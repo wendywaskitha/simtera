@@ -4,7 +4,7 @@
             <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Informasi UTTP</h4>
             <div class="space-y-1 text-sm">
                 <div><span class="font-medium">Kode:</span> {{ $uttp->kode_uttp }}</div>
-                <div><span class="font-medium">Pemilik:</span> {{ $uttp->nama_pemilik }}</div>
+                <div><span class="font-medium">Pemilik:</span> {{ $uttp->pemilik->nama }}</div>
                 <div><span class="font-medium">Jenis:</span> {{ $uttp->jenisUttp->nama }}</div>
                 <div><span class="font-medium">Nomor Seri:</span> {{ $uttp->nomor_seri }}</div>
             </div>
@@ -12,7 +12,7 @@
         <div>
             <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-2">Status & Lokasi</h4>
             <div class="space-y-1 text-sm">
-                <div><span class="font-medium">Status Tera:</span> 
+                <div><span class="font-medium">Status Tera:</span>
                     <span class="px-2 py-1 rounded text-xs {{ $uttp->status_tera === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
                         {{ $uttp->status_tera }}
                     </span>

@@ -3,7 +3,7 @@
         <x-slot name="heading">
             📊 Performance Metrics - {{ now()->format('F Y') }}
         </x-slot>
-        
+
         <x-slot name="description">
             Key Performance Indicators dan metrics kinerja sistem
         </x-slot>
@@ -70,7 +70,7 @@
                     </div>
                     <div class="text-3xl">⭐</div>
                 </div>
-                <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">Berdasarkan tingkat lulus</p>
+                <p class="text-xs text-orange-600 dark:text-orange-400 mt-1">Berdasarkan tingkat sah</p>
             </div>
         </div>
 
@@ -89,9 +89,9 @@
                             <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <div class="flex items-center space-x-3">
                                     <div class="flex-shrink-0">
-                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full 
-                                            {{ $index === 0 ? 'bg-yellow-100 text-yellow-800' : 
-                                               ($index === 1 ? 'bg-gray-100 text-gray-800' : 
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full
+                                            {{ $index === 0 ? 'bg-yellow-100 text-yellow-800' :
+                                               ($index === 1 ? 'bg-gray-100 text-gray-800' :
                                                ($index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800')) }}">
                                             {{ $index + 1 }}
                                         </span>
@@ -103,7 +103,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $petugas->total_tera }} tera</p>
-                                    <p class="text-sm text-green-600 dark:text-green-400">{{ $petugas->success_rate }}% lulus</p>
+                                    <p class="text-sm text-green-600 dark:text-green-400">{{ $petugas->success_rate }}% sah</p>
                                 </div>
                             </div>
                         @endforeach

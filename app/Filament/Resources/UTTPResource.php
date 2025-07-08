@@ -6,7 +6,7 @@ use Filament\Forms;
 use App\Models\Desa;
 use App\Models\UTTP;
 use Filament\Tables;
-use App\Models\Pasar;
+use App\Models\Pemilik;
 use Filament\Forms\Form;
 use App\Models\JenisUTTP;
 use Filament\Tables\Table;
@@ -23,17 +23,11 @@ class UTTPResource extends Resource
     protected static ?string $model = UTTP::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-scale';
-    
     protected static ?string $navigationLabel = 'Data UTTP';
-    
     protected static ?string $modelLabel = 'UTTP';
-    
     protected static ?string $pluralModelLabel = 'UTTP';
-    
     protected static ?string $navigationGroup = 'Data UTTP';
-    
     protected static ?int $navigationSort = 1;
-    
     protected static ?string $recordTitleAttribute = 'kode_uttp';
 
     public static function form(Form $form): Form
@@ -42,76 +36,59 @@ class UTTPResource extends Resource
             ->schema([
                 Forms\Components\Wizard::make([
                     Forms\Components\Wizard\Step::make('Data Pemilik')
-                        ->description('Informasi pemilik UTTP')
+                        ->description('Pilih atau tambah pemilik UTTP')
                         ->icon('heroicon-o-user')
                         ->schema([
                             Forms\Components\Section::make('Identitas Pemilik')
                                 ->schema([
-                                    Forms\Components\Grid::make(2)
-                                        ->schema([
-                                            Forms\Components\TextInput::make('nama_pemilik')
+                                    Forms\Components\Select::make('pemilik_id')
+                                        ->label('Pemilik UTTP')
+                                        ->relationship('pemilik', 'nama')
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->prefixIcon('heroicon-o-user')
+                                        ->getOptionLabelFromRecordUsing(fn (Pemilik $record) => "{$record->nama} - {$record->nik}")
+                                        ->createOptionForm([
+                                            Forms\Components\TextInput::make('nama')
                                                 ->label('Nama Pemilik')
                                                 ->required()
                                                 ->maxLength(100)
-                                                ->placeholder('Nama lengkap pemilik UTTP')
-                                                ->prefixIcon('heroicon-o-user')
                                                 ->live(onBlur: true)
                                                 ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
                                                     if ($operation !== 'create') {
                                                         return;
                                                     }
-                                                    $set('nama_pemilik', ucwords(strtolower($state)));
+                                                    $set('nama', ucwords(strtolower($state)));
                                                 }),
-                                                
-                                            Forms\Components\TextInput::make('nik_pemilik')
+                                            Forms\Components\TextInput::make('nik')
                                                 ->label('NIK Pemilik')
                                                 ->maxLength(20)
-                                                ->placeholder('Nomor Induk Kependudukan')
-                                                ->prefixIcon('heroicon-o-identification')
+                                                ->unique('pemiliks', 'nik')
                                                 ->rules(['regex:/^\d{16}$/'])
                                                 ->helperText('Format: 16 digit angka'),
-                                        ]),
-                                        
-                                    Forms\Components\Grid::make(2)
-                                        ->schema([
-                                            Forms\Components\TextInput::make('telepon_pemilik')
+                                            Forms\Components\TextInput::make('telepon')
                                                 ->label('Nomor Telepon')
                                                 ->tel()
                                                 ->maxLength(15)
-                                                ->placeholder('08123456789')
-                                                ->prefixIcon('heroicon-o-phone')
-                                                ->helperText('Nomor telepon untuk notifikasi'),
-                                                
-                                            Forms\Components\Select::make('desa_id')
-                                                ->label('Desa/Kelurahan')
-                                                ->relationship('desa', 'nama')
-                                                ->searchable()
-                                                ->preload()
+                                                ->placeholder('08123456789'),
+                                            Forms\Components\Textarea::make('alamat')
+                                                ->label('Alamat Pemilik')
                                                 ->required()
-                                                ->prefixIcon('heroicon-o-map-pin')
-                                                ->createOptionForm([
-                                                    Forms\Components\Select::make('kecamatan_id')
-                                                        ->label('Kecamatan')
-                                                        ->relationship('kecamatan', 'nama')
-                                                        ->required(),
-                                                    Forms\Components\TextInput::make('nama')
-                                                        ->label('Nama Desa')
-                                                        ->required()
-                                                        ->maxLength(100),
-                                                ])
-                                                ->placeholder('Pilih desa lokasi UTTP'),
-                                        ]),
-                                        
-                                    Forms\Components\Textarea::make('alamat_pemilik')
-                                        ->label('Alamat Pemilik')
-                                        ->required()
-                                        ->rows(3)
-                                        ->placeholder('Alamat lengkap pemilik UTTP')
-                                        ->columnSpanFull(),
+                                                ->rows(3),
+                                        ])
+                                        ->createOptionAction(function (Forms\Components\Actions\Action $action) {
+                                            return $action
+                                                ->modalHeading('Tambah Pemilik Baru')
+                                                ->modalSubmitActionLabel('Tambah Pemilik')
+                                                ->modalWidth('lg');
+                                        })
+                                        ->placeholder('Pilih pemilik atau tambah baru')
+                                        ->helperText('Pilih pemilik yang sudah ada atau tambah pemilik baru'),
                                 ])
                                 ->columns(1),
                         ]),
-                        
+
                     Forms\Components\Wizard\Step::make('Data UTTP')
                         ->description('Spesifikasi teknis UTTP')
                         ->icon('heroicon-o-scale')
@@ -137,7 +114,7 @@ class UTTPResource extends Resource
                                                         ->maxLength(20),
                                                 ])
                                                 ->placeholder('Pilih jenis UTTP'),
-                                                
+
                                             Forms\Components\TextInput::make('nomor_seri')
                                                 ->label('Nomor Seri')
                                                 ->required()
@@ -146,7 +123,7 @@ class UTTPResource extends Resource
                                                 ->placeholder('Nomor seri unik UTTP')
                                                 ->prefixIcon('heroicon-o-hashtag'),
                                         ]),
-                                        
+
                                     Forms\Components\Grid::make(3)
                                         ->schema([
                                             Forms\Components\TextInput::make('merk')
@@ -154,13 +131,13 @@ class UTTPResource extends Resource
                                                 ->maxLength(50)
                                                 ->placeholder('Merk UTTP')
                                                 ->prefixIcon('heroicon-o-tag'),
-                                                
+
                                             Forms\Components\TextInput::make('tipe')
                                                 ->label('Tipe/Model')
                                                 ->maxLength(50)
                                                 ->placeholder('Tipe atau model UTTP')
                                                 ->prefixIcon('heroicon-o-cube'),
-                                                
+
                                             Forms\Components\TextInput::make('tahun_pembuatan')
                                                 ->label('Tahun Pembuatan')
                                                 ->numeric()
@@ -169,7 +146,7 @@ class UTTPResource extends Resource
                                                 ->placeholder(date('Y'))
                                                 ->prefixIcon('heroicon-o-calendar'),
                                         ]),
-                                        
+
                                     Forms\Components\Grid::make(2)
                                         ->schema([
                                             Forms\Components\TextInput::make('kapasitas_maksimum')
@@ -179,7 +156,7 @@ class UTTPResource extends Resource
                                                 ->placeholder('0.000')
                                                 ->prefixIcon('heroicon-o-arrow-up-circle')
                                                 ->helperText('Kapasitas maksimal dalam satuan yang sesuai'),
-                                                
+
                                             Forms\Components\TextInput::make('daya_baca')
                                                 ->label('Daya Baca/Ketelitian')
                                                 ->numeric()
@@ -191,7 +168,8 @@ class UTTPResource extends Resource
                                 ])
                                 ->columns(1),
                         ]),
-                        
+
+                    // Step Lokasi & Status tetap sama seperti sebelumnya
                     Forms\Components\Wizard\Step::make('Lokasi & Status')
                         ->description('Lokasi dan status tera UTTP')
                         ->icon('heroicon-o-map-pin')
@@ -210,43 +188,34 @@ class UTTPResource extends Resource
                                             'Luar Pasar' => 'UTTP di SPBU, toko, industri - perlu surat permohonan',
                                         ])
                                         ->live()
-                                        ->afterStateUpdated(fn (Forms\Set $set) => $set('pasar_id', null))
                                         ->inline()
                                         ->columnSpanFull(),
-                                        
+
                                     Forms\Components\Grid::make(2)
                                         ->schema([
-                                            Forms\Components\Select::make('pasar_id')
-                                                ->label('Nama Pasar')
-                                                ->relationship('pasar', 'nama')
+                                            Forms\Components\Select::make('desa_id')
+                                                ->label('Desa/Kelurahan')
+                                                ->relationship('desa', 'nama')
                                                 ->searchable()
                                                 ->preload()
-                                                ->prefixIcon('heroicon-o-building-storefront')
-                                                ->createOptionForm([
-                                                    Forms\Components\TextInput::make('nama')
-                                                        ->required()
-                                                        ->maxLength(100),
-                                                    Forms\Components\Select::make('desa_id')
-                                                        ->relationship('desa', 'nama')
-                                                        ->required(),
-                                                ])
-                                                ->visible(fn (Forms\Get $get) => $get('lokasi_type') === 'Pasar')
-                                                ->placeholder('Pilih pasar'),
-                                                
+                                                ->required()
+                                                ->prefixIcon('heroicon-o-map-pin')
+                                                ->placeholder('Pilih desa lokasi UTTP'),
+
                                             Forms\Components\TextInput::make('detail_lokasi')
                                                 ->label(fn (Forms\Get $get) => $get('lokasi_type') === 'Pasar' ? 'Lokasi Kios/Lapak' : 'Detail Lokasi')
                                                 ->maxLength(100)
                                                 ->placeholder(fn (Forms\Get $get) => $get('lokasi_type') === 'Pasar' ? 'Contoh: Kios A-12' : 'Contoh: SPBU Shell Raha')
                                                 ->prefixIcon('heroicon-o-map-pin'),
                                         ]),
-                                        
+
                                     Forms\Components\Textarea::make('alamat_lengkap')
                                         ->label('Alamat Lengkap')
                                         ->required()
                                         ->rows(3)
                                         ->placeholder('Alamat lengkap lokasi UTTP')
                                         ->columnSpanFull(),
-                                        
+
                                     Forms\Components\Grid::make(2)
                                         ->schema([
                                             Forms\Components\TextInput::make('latitude')
@@ -256,7 +225,7 @@ class UTTPResource extends Resource
                                                 ->prefixIcon('heroicon-o-globe-alt')
                                                 ->helperText('Koordinat lintang (opsional)')
                                                 ->rules(['regex:/^-?\d+\.\d+$/']),
-                                                
+
                                             Forms\Components\TextInput::make('longitude')
                                                 ->label('Longitude')
                                                 ->numeric()
@@ -267,7 +236,7 @@ class UTTPResource extends Resource
                                         ]),
                                 ])
                                 ->columns(1),
-                                
+
                             Forms\Components\Section::make('Status Tera')
                                 ->schema([
                                     Forms\Components\Grid::make(2)
@@ -285,27 +254,27 @@ class UTTPResource extends Resource
                                                 ->default('Belum Tera')
                                                 ->prefixIcon('heroicon-o-shield-check')
                                                 ->live(),
-                                                
+
                                             Forms\Components\Toggle::make('is_active')
                                                 ->label('Status Aktif')
                                                 ->default(true)
                                                 ->helperText('Aktifkan untuk menampilkan UTTP dalam sistem')
                                                 ->inline(false),
                                         ]),
-                                        
+
                                     Forms\Components\Grid::make(2)
                                         ->schema([
                                             Forms\Components\DatePicker::make('tanggal_tera_terakhir')
                                                 ->label('Tanggal Tera Terakhir')
                                                 ->prefixIcon('heroicon-o-calendar')
                                                 ->visible(fn (Forms\Get $get) => in_array($get('status_tera'), ['Aktif', 'Expired'])),
-                                                
+
                                             Forms\Components\DatePicker::make('tanggal_expired')
                                                 ->label('Tanggal Expired')
                                                 ->prefixIcon('heroicon-o-calendar')
                                                 ->visible(fn (Forms\Get $get) => in_array($get('status_tera'), ['Aktif', 'Expired'])),
                                         ]),
-                                        
+
                                     Forms\Components\Grid::make(2)
                                         ->schema([
                                             Forms\Components\TextInput::make('nomor_sertifikat')
@@ -313,7 +282,7 @@ class UTTPResource extends Resource
                                                 ->maxLength(50)
                                                 ->prefixIcon('heroicon-o-document-text')
                                                 ->visible(fn (Forms\Get $get) => $get('status_tera') === 'Aktif'),
-                                                
+
                                             Forms\Components\TextInput::make('petugas_tera')
                                                 ->label('Petugas Tera')
                                                 ->maxLength(100)
@@ -323,7 +292,8 @@ class UTTPResource extends Resource
                                 ])
                                 ->columns(1),
                         ]),
-                        
+
+                    // Step Dokumentasi tetap sama
                     Forms\Components\Wizard\Step::make('Dokumentasi')
                         ->description('Upload foto dan keterangan')
                         ->icon('heroicon-o-camera')
@@ -345,7 +315,7 @@ class UTTPResource extends Resource
                                         ])
                                         ->helperText('Upload maksimal 5 foto UTTP (format: JPG, PNG)')
                                         ->columnSpanFull(),
-                                        
+
                                     Forms\Components\Textarea::make('keterangan')
                                         ->label('Keterangan Tambahan')
                                         ->rows(4)
@@ -373,18 +343,17 @@ class UTTPResource extends Resource
                     ->copyMessage('Kode UTTP disalin!')
                     ->badge()
                     ->color('primary'),
-                    
-                Tables\Columns\TextColumn::make('nama_pemilik')
+
+                Tables\Columns\TextColumn::make('pemilik.nama')
                     ->label('Nama Pemilik')
                     ->searchable()
                     ->sortable()
                     ->weight(FontWeight::Medium)
                     ->icon('heroicon-o-user')
                     ->limit(25)
-                    ->tooltip(function (UTTP $record): ?string {
-                        return $record->nama_pemilik;
-                    }),
-                    
+                    ->tooltip(fn (UTTP $record): ?string => $record->pemilik?->nama)
+                    ->url(fn (UTTP $record) => $record->pemilik ? route('filament.backend.resources.pemiliks.view', $record->pemilik) : null),
+
                 Tables\Columns\TextColumn::make('jenisUttp.nama')
                     ->label('Jenis UTTP')
                     ->searchable()
@@ -392,7 +361,7 @@ class UTTPResource extends Resource
                     ->badge()
                     ->color('info')
                     ->icon('heroicon-o-squares-2x2'),
-                    
+
                 Tables\Columns\TextColumn::make('nomor_seri')
                     ->label('Nomor Seri')
                     ->searchable()
@@ -401,16 +370,14 @@ class UTTPResource extends Resource
                     ->copyMessage('Nomor seri disalin!')
                     ->badge()
                     ->color('gray'),
-                    
+
                 Tables\Columns\TextColumn::make('lokasi_lengkap')
                     ->label('Lokasi')
                     ->searchable(['detail_lokasi', 'alamat_lengkap'])
                     ->limit(30)
-                    ->tooltip(function (UTTP $record): ?string {
-                        return $record->lokasi_lengkap;
-                    })
+                    ->tooltip(fn (UTTP $record): ?string => $record->lokasi_lengkap)
                     ->icon('heroicon-o-map-pin'),
-                    
+
                 Tables\Columns\BadgeColumn::make('status_tera')
                     ->label('Status Tera')
                     ->colors([
@@ -424,7 +391,7 @@ class UTTPResource extends Resource
                         'heroicon-o-exclamation-triangle' => 'Expired',
                         'heroicon-o-x-circle' => ['Rusak', 'Tidak Layak'],
                     ]),
-                    
+
                 Tables\Columns\TextColumn::make('tanggal_expired')
                     ->label('Expired')
                     ->date('d M Y')
@@ -438,7 +405,7 @@ class UTTPResource extends Resource
                         if (!$record->tanggal_expired) return 'heroicon-o-minus';
                         return $record->is_expired_soon ? 'heroicon-o-exclamation-triangle' : 'heroicon-o-calendar';
                     }),
-                    
+
                 Tables\Columns\TextColumn::make('lokasi_type')
                     ->label('Tipe Lokasi')
                     ->badge()
@@ -451,7 +418,7 @@ class UTTPResource extends Resource
                         'Luar Pasar' => 'heroicon-o-building-office',
                     })
                     ->toggleable(),
-                    
+
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Status')
                     ->boolean()
@@ -459,7 +426,7 @@ class UTTPResource extends Resource
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger'),
-                    
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y')
@@ -467,12 +434,18 @@ class UTTPResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('pemilik_id')
+                    ->label('Pemilik')
+                    ->relationship('pemilik', 'nama')
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('jenis_uttp_id')
                     ->label('Jenis UTTP')
                     ->relationship('jenisUttp', 'nama')
                     ->searchable()
                     ->preload(),
-                    
+
                 SelectFilter::make('status_tera')
                     ->label('Status Tera')
                     ->options([
@@ -483,30 +456,30 @@ class UTTPResource extends Resource
                         'Tidak Layak' => 'Tidak Layak',
                     ])
                     ->multiple(),
-                    
+
                 SelectFilter::make('lokasi_type')
                     ->label('Tipe Lokasi')
                     ->options([
                         'Pasar' => 'Pasar',
                         'Luar Pasar' => 'Luar Pasar',
                     ]),
-                    
+
                 SelectFilter::make('desa_id')
                     ->label('Desa')
                     ->relationship('desa', 'nama')
                     ->searchable()
                     ->preload(),
-                    
+
                 Filter::make('expired_soon')
                     ->label('Akan Expired (30 hari)')
                     ->query(fn (Builder $query): Builder => $query->expiredSoon())
                     ->toggle(),
-                    
+
                 Filter::make('has_coordinates')
                     ->label('Memiliki Koordinat GPS')
                     ->query(fn (Builder $query): Builder => $query->whereNotNull('latitude')->whereNotNull('longitude'))
                     ->toggle(),
-                    
+
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Status Aktif')
                     ->placeholder('Semua Status')
@@ -523,19 +496,25 @@ class UTTPResource extends Resource
                         ->label('Lihat Lokasi')
                         ->icon('heroicon-o-map')
                         ->color('info')
-                        ->url(fn (UTTP $record) => $record->latitude && $record->longitude 
-                            ? "https://www.google.com/maps?q={$record->latitude},{$record->longitude}" 
+                        ->url(fn (UTTP $record) => $record->latitude && $record->longitude
+                            ? "https://www.google.com/maps?q={$record->latitude},{$record->longitude}"
                             : null)
                         ->openUrlInNewTab()
                         ->visible(fn (UTTP $record) => $record->latitude && $record->longitude),
+                    Tables\Actions\Action::make('view_pemilik')
+                        ->label('Lihat Pemilik')
+                        ->icon('heroicon-o-user')
+                        ->color('success')
+                        ->url(fn (UTTP $record) => $record->pemilik ? route('filament.backend.resources.pemiliks.view', $record->pemilik) : null)
+                        ->visible(fn (UTTP $record) => $record->pemilik),
                     Tables\Actions\Action::make('create_permohonan')
                         ->label('Buat Permohonan Tera')
                         ->icon('heroicon-o-document-plus')
-                        ->color('success')
+                        ->color('warning')
                         ->url(fn (UTTP $record) => \App\Filament\Resources\PermohonanTeraResource::getUrl('create', ['uttp_id' => $record->id]))
                         ->visible(fn (UTTP $record) => in_array($record->status_tera, ['Belum Tera', 'Expired'])),
-                                        Tables\Actions\DeleteAction::make()
-                                            ->icon('heroicon-o-trash'),
+                    Tables\Actions\DeleteAction::make()
+                        ->icon('heroicon-o-trash'),
                 ])
                 ->label('Aksi')
                 ->icon('heroicon-m-ellipsis-vertical')
@@ -562,11 +541,10 @@ class UTTPResource extends Resource
                         ->icon('heroicon-o-arrow-down-tray')
                         ->color('info')
                         ->action(function ($records) {
-                            // Implementasi export Excel/CSV
                             return response()->streamDownload(function () use ($records) {
-                                echo "Kode UTTP,Nama Pemilik,Jenis UTTP,Status Tera,Lokasi\n";
+                                echo "Kode UTTP,Nama Pemilik,NIK Pemilik,Jenis UTTP,Status Tera,Lokasi\n";
                                 foreach ($records as $record) {
-                                    echo "{$record->kode_uttp},{$record->nama_pemilik},{$record->jenisUttp->nama},{$record->status_tera},{$record->lokasi_lengkap}\n";
+                                    echo "{$record->kode_uttp},{$record->pemilik?->nama},{$record->pemilik?->nik},{$record->jenisUttp->nama},{$record->status_tera},{$record->lokasi_lengkap}\n";
                                 }
                             }, 'uttp-export-' . date('Y-m-d') . '.csv');
                         }),
@@ -586,20 +564,21 @@ class UTTPResource extends Resource
             'edit' => Pages\EditUTTP::route('/{record}/edit'),
         ];
     }
-    
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::aktif()->count();
     }
-    
+
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->kode_uttp . ' - ' . $record->nama_pemilik;
+        return $record->kode_uttp . ' - ' . ($record->pemilik?->nama ?? 'Tanpa Pemilik');
     }
-    
+
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
+            'Pemilik' => $record->pemilik?->nama ?? 'Tanpa Pemilik',
             'Jenis' => $record->jenisUttp->nama,
             'Status' => $record->status_tera,
             'Lokasi' => $record->lokasi_lengkap,

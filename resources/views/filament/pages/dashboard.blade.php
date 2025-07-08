@@ -5,7 +5,7 @@
             <!-- Background Pattern -->
             <div class="absolute inset-0 bg-grid-white/[0.05] dark:bg-grid-white/[0.02]"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent dark:from-transparent dark:via-gray-700/10 dark:to-transparent"></div>
-            
+
             <!-- Content -->
             <div class="relative z-10">
                 <div class="flex items-center justify-between">
@@ -28,7 +28,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <p class="text-blue-100 dark:text-gray-300 text-lg leading-relaxed max-w-2xl">
                             {{ match(auth()->user()->role) {
                                 'admin' => '🛡️ Anda memiliki akses penuh ke sistem UPTD Metrologi Legal',
@@ -39,7 +39,7 @@
                             } }}
                         </p>
                     </div>
-                    
+
                     <!-- Decorative Icon -->
                     <div class="hidden lg:block">
                         <div class="relative">
@@ -48,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Quick Stats Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                     <div class="group bg-white/20 dark:bg-gray-700/30 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 dark:border-gray-600/50 hover:bg-white/30 dark:hover:bg-gray-700/50 transition-all duration-300 hover:scale-105">
@@ -60,7 +60,7 @@
                             <div class="bg-white dark:bg-gray-300 h-1 rounded-full w-full"></div>
                         </div>
                     </div>
-                    
+
                     <div class="group bg-white/20 dark:bg-gray-700/30 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 dark:border-gray-600/50 hover:bg-white/30 dark:hover:bg-gray-700/50 transition-all duration-300 hover:scale-105">
                         <div class="text-3xl font-bold text-white dark:text-gray-100 mb-1">
                             {{ number_format(\App\Models\PermohonanTera::where('status', 'Pending')->count()) }}
@@ -70,7 +70,7 @@
                             <div class="bg-yellow-300 h-1 rounded-full" style="width: {{ \App\Models\PermohonanTera::where('status', 'Pending')->count() > 0 ? '75%' : '0%' }}"></div>
                         </div>
                     </div>
-                    
+
                     <div class="group bg-white/20 dark:bg-gray-700/30 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 dark:border-gray-600/50 hover:bg-white/30 dark:hover:bg-gray-700/50 transition-all duration-300 hover:scale-105">
                         <div class="text-3xl font-bold text-white dark:text-gray-100 mb-1">
                             {{ number_format(\App\Models\HasilTera::whereMonth('tanggal_tera', now()->month)->count()) }}
@@ -80,7 +80,7 @@
                             <div class="bg-green-300 h-1 rounded-full w-4/5"></div>
                         </div>
                     </div>
-                    
+
                     <div class="group bg-white/20 dark:bg-gray-700/30 backdrop-blur-sm rounded-xl p-4 text-center border border-white/30 dark:border-gray-600/50 hover:bg-white/30 dark:hover:bg-gray-700/50 transition-all duration-300 hover:scale-105">
                         <div class="text-3xl font-bold text-white dark:text-gray-100 mb-1">
                             {{ number_format(\App\Models\User::where('is_active', true)->count()) }}
@@ -91,27 +91,27 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Quick Actions -->
                 <div class="mt-6 flex flex-wrap gap-3">
                     @if(auth()->user()->hasPermission('create'))
-                        <a href="{{ \App\Filament\Resources\UTTPResource::getUrl('create') }}" 
+                        <a href="{{ \App\Filament\Resources\UTTPResource::getUrl('create') }}"
                            class="inline-flex items-center px-4 py-2 bg-white/20 dark:bg-gray-700/50 hover:bg-white/30 dark:hover:bg-gray-700/70 text-white dark:text-gray-200 rounded-lg font-medium transition-all duration-200 backdrop-blur-sm border border-white/30 dark:border-gray-600/50">
                             <span class="mr-2">⚖️</span>
                             Tambah UTTP
                         </a>
                     @endif
-                    
+
                     @if(auth()->user()->hasPermission('input_results'))
-                        <a href="{{ \App\Filament\Resources\HasilTeraResource::getUrl('create') }}" 
+                        <a href="{{ \App\Filament\Resources\HasilTeraResource::getUrl('create') }}"
                            class="inline-flex items-center px-4 py-2 bg-white/20 dark:bg-gray-700/50 hover:bg-white/30 dark:hover:bg-gray-700/70 text-white dark:text-gray-200 rounded-lg font-medium transition-all duration-200 backdrop-blur-sm border border-white/30 dark:border-gray-600/50">
                             <span class="mr-2">✅</span>
                             Input Hasil
                         </a>
                     @endif
-                    
+
                     @if(auth()->user()->hasPermission('view_reports'))
-                        <a href="{{ \App\Filament\Resources\LaporanBulananResource::getUrl('index') }}" 
+                        <a href="{{ \App\Filament\Resources\LaporanBulananResource::getUrl('index') }}"
                            class="inline-flex items-center px-4 py-2 bg-white/20 dark:bg-gray-700/50 hover:bg-white/30 dark:hover:bg-gray-700/70 text-white dark:text-gray-200 rounded-lg font-medium transition-all duration-200 backdrop-blur-sm border border-white/30 dark:border-gray-600/50">
                             <span class="mr-2">📊</span>
                             Laporan
@@ -143,36 +143,36 @@
         <!-- Performance Indicator -->
         @php
             $totalTera = \App\Models\HasilTera::whereMonth('tanggal_tera', now()->month)->count();
-            $teraLulus = \App\Models\HasilTera::whereMonth('tanggal_tera', now()->month)->where('hasil', 'Lulus')->count();
-            $successRate = $totalTera > 0 ? round(($teraLulus / $totalTera) * 100, 1) : 0;
+            $teraSah = \App\Models\HasilTera::whereMonth('tanggal_tera', now()->month)->where('hasil', 'Sah')->count();
+            $successRate = $totalTera > 0 ? round(($teraSah / $totalTera) * 100, 1) : 0;
         @endphp
-        
+
         <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Performance Bulan Ini</h3>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                    {{ $successRate >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
-                       ($successRate >= 75 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : 
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    {{ $successRate >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+                       ($successRate >= 75 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
                         'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400') }}">
                     {{ $successRate }}% Success Rate
                 </span>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="text-center">
                     <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $totalTera }}</div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">Total Tera</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $teraLulus }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Tera Lulus</div>
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $teraSah }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Tera Sah</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $totalTera - $teraLulus }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Tidak Lulus</div>
+                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $totalTera - $teraSah }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Batal</div>
                 </div>
             </div>
-            
+
             <!-- Progress Bar -->
             <div class="mt-4">
                 <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
@@ -180,7 +180,7 @@
                     <span>{{ $totalTera }}/100</span>
                 </div>
                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500" 
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
                          style="width: {{ min(($totalTera / 100) * 100, 100) }}%"></div>
                 </div>
             </div>
@@ -192,21 +192,21 @@
                 @livewire($widget)
             @endforeach
         </div>
-        
+
         <!-- Footer Info -->
         <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700 shadow-sm">
             <div class="flex items-center justify-center space-x-2 mb-3">
                 <span class="text-2xl">⚖️</span>
                 <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">UPTD Metrologi Legal</h4>
             </div>
-            
+
             <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
                 © {{ date('Y') }} UPTD Metrologi Legal Kabupaten Muna Barat
             </p>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
                 Sistem Informasi Pelayanan Tera dan Tera Ulang
             </p>
-            
+
             <div class="flex items-center justify-center space-x-4 text-xs text-gray-500 dark:text-gray-500">
                 <span class="flex items-center space-x-1">
                     <span class="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -231,11 +231,11 @@
         .bg-grid-white\/\[0\.05\] {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.05)'%3e%3cpath d='m0 .5h32m-32 32v-32'/%3e%3c/svg%3e");
         }
-        
+
         .dark .bg-grid-white\/\[0\.02\] {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='m0 .5h32m-32 32v-32'/%3e%3c/svg%3e");
         }
-        
+
         @media (prefers-reduced-motion: reduce) {
             .transition-all {
                 transition: none;

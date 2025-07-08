@@ -11,50 +11,50 @@ class TeraPerformanceChart extends ChartWidget
     protected static ?string $heading = 'Performa Tera 6 Bulan Terakhir';
     protected static ?int $sort = 2;
     protected static string $color = 'info';
-    
+
     public function getDescription(): ?string
     {
-        return 'Grafik perbandingan tera lulus vs tidak lulus';
+        return 'Grafik perbandingan tera sah vs batal';
     }
 
     protected function getData(): array
     {
         $months = [];
-        $teraLulus = [];
-        $teraTidakLulus = [];
-        
+        $teraSah = [];
+        $teraBatal = [];
+
         for ($i = 5; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $startDate = $date->copy()->startOfMonth();
             $endDate = $date->copy()->endOfMonth();
-            
+
             $months[] = $date->format('M Y');
-            
-            $lulus = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
-                             ->where('hasil', 'Lulus')
+
+            $sah = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
+                             ->where('hasil', 'Sah')
                              ->count();
-            
-            $tidakLulus = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
-                                  ->where('hasil', '!=', 'Lulus')
+
+            $batal = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
+                                  ->where('hasil', '!=', 'Sah')
                                   ->count();
-            
-            $teraLulus[] = $lulus;
-            $teraTidakLulus[] = $tidakLulus;
+
+            $teraSah[] = $sah;
+            $teraBatal[] = $batal;
         }
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Tera Lulus',
-                    'data' => $teraLulus,
+                    'label' => 'Tera Sah',
+                    'data' => $teraSah,
                     'backgroundColor' => 'rgba(34, 197, 94, 0.2)',
                     'borderColor' => 'rgb(34, 197, 94)',
                     'borderWidth' => 2,
                     'fill' => true,
                 ],
                 [
-                    'label' => 'Tera Tidak Lulus',
-                    'data' => $teraTidakLulus,
+                    'label' => 'Tera Batal',
+                    'data' => $teraBatal,
                     'backgroundColor' => 'rgba(239, 68, 68, 0.2)',
                     'borderColor' => 'rgb(239, 68, 68)',
                     'borderWidth' => 2,
@@ -69,7 +69,7 @@ class TeraPerformanceChart extends ChartWidget
     {
         return 'line';
     }
-    
+
     protected function getOptions(): array
     {
         return [

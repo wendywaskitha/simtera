@@ -13,19 +13,19 @@ class DownloadController extends Controller
     public function downloadCertificate(HasilTera $hasilTera)
     {
         // Validasi akses
-        if ($hasilTera->hasil !== 'Lulus' || !$hasilTera->nomor_sertifikat) {
+        if ($hasilTera->hasil !== 'Sah' || !$hasilTera->nomor_sertifikat) {
             abort(404, 'Sertifikat tidak tersedia');
         }
 
         // Generate PDF jika belum ada
         $pdfPath = $this->generateCertificatePDF($hasilTera);
-        
+
         if (!Storage::exists($pdfPath)) {
             abort(404, 'File sertifikat tidak ditemukan');
         }
 
         $fileName = "Sertifikat_Tera_{$hasilTera->nomor_sertifikat}.pdf";
-        
+
         return Storage::download($pdfPath, $fileName, [
             'Content-Type' => 'application/pdf',
         ]);
@@ -37,15 +37,15 @@ class DownloadController extends Controller
             abort(404, 'Dokumen tidak tersedia');
         }
 
-        $dokumenPath = is_array($permohonan->dokumen_pendukung) 
-            ? $permohonan->dokumen_pendukung[0] 
+        $dokumenPath = is_array($permohonan->dokumen_pendukung)
+            ? $permohonan->dokumen_pendukung[0]
             : $permohonan->dokumen_pendukung;
 
         if (!Storage::exists($dokumenPath)) {
             abort(404, 'File dokumen tidak ditemukan');
         }
 
-        $fileName = "Dokumen_Permohonan_{$permohonan->nomor_permohonan}." . 
+        $fileName = "Dokumen_Permohonan_{$permohonan->nomor_permohonan}." .
                    pathinfo($dokumenPath, PATHINFO_EXTENSION);
 
         return Storage::download($dokumenPath, $fileName);
@@ -69,10 +69,10 @@ class DownloadController extends Controller
 
         // Generate PDF menggunakan TCPDF atau library lain
         $pdf = $this->createCertificatePDF($hasilTera);
-        
+
         // Simpan PDF
         Storage::put($fullPath, $pdf->Output('', 'S'));
-        
+
         return $fullPath;
     }
 
@@ -82,20 +82,20 @@ class DownloadController extends Controller
         $pdf = new \TCPDF();
         $pdf->AddPage();
         $pdf->SetFont('helvetica', 'B', 16);
-        
+
         // Header sertifikat
         $pdf->Cell(0, 15, 'SERTIFIKAT TERA', 0, 1, 'C');
         $pdf->Ln(10);
-        
+
         // Logo dan kop surat
         $pdf->SetFont('helvetica', 'B', 12);
         $pdf->Cell(0, 8, 'UPTD METROLOGI LEGAL', 0, 1, 'C');
         $pdf->Cell(0, 8, 'KABUPATEN MUNA BARAT', 0, 1, 'C');
         $pdf->Ln(10);
-        
+
         // Content sertifikat
         $pdf->SetFont('helvetica', '', 10);
-        
+
         $content = "
         <table cellpadding='5'>
             <tr>
@@ -106,7 +106,7 @@ class DownloadController extends Controller
             <tr>
                 <td>Nama Pemilik</td>
                 <td>:</td>
-                <td>{$hasilTera->uttp->nama_pemilik}</td>
+                <td>{$hasilTera->uttp->pemilik->nama}</td>
             </tr>
             <tr>
                 <td>Jenis UTTP</td>
@@ -145,16 +145,16 @@ class DownloadController extends Controller
             </tr>
         </table>
         ";
-        
+
         $pdf->writeHTML($content, true, false, true, false, '');
-        
+
         // Footer
         $pdf->Ln(20);
         $pdf->Cell(0, 8, 'Raha, ' . $hasilTera->tanggal_tera->format('d F Y'), 0, 1, 'R');
         $pdf->Cell(0, 8, 'Kepala UPTD Metrologi Legal', 0, 1, 'R');
         $pdf->Ln(20);
         $pdf->Cell(0, 8, '_________________________', 0, 1, 'R');
-        
+
         return $pdf;
     }
 }

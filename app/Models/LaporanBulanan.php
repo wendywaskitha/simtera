@@ -15,8 +15,8 @@ class LaporanBulanan extends Model
         'bulan',
         'total_uttp_terdaftar',
         'total_tera_dilakukan',
-        'total_tera_lulus',
-        'total_tera_tidak_lulus',
+        'total_tera_sah',
+        'total_tera_batal',
         'total_permohonan',
         'detail_per_jenis',
         'detail_per_lokasi',
@@ -52,7 +52,7 @@ class LaporanBulanan extends Model
             7 => 'Juli', 8 => 'Agustus', 9 => 'September',
             10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
-        
+
         return $namaBulan[$this->bulan] ?? '';
     }
 
@@ -61,13 +61,13 @@ class LaporanBulanan extends Model
         return $this->nama_bulan . ' ' . $this->tahun;
     }
 
-    public function getPersentaseLulusAttribute()
+    public function getPersentaseSahAttribute()
     {
         if ($this->total_tera_dilakukan == 0) {
             return 0;
         }
-        
-        return round(($this->total_tera_lulus / $this->total_tera_dilakukan) * 100, 2);
+
+        return round(($this->total_tera_sah / $this->total_tera_dilakukan) * 100, 2);
     }
 
     // Static methods untuk generate laporan
@@ -82,10 +82,10 @@ class LaporanBulanan extends Model
                                   ->count();
 
         $hasilTeraBulanIni = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate]);
-        
+
         $totalTeraDilakukan = $hasilTeraBulanIni->count();
-        $totalTeraLulus = $hasilTeraBulanIni->where('hasil', 'Lulus')->count();
-        $totalTeraNotLulus = $totalTeraDilakukan - $totalTeraLulus;
+        $totalTeraSah = $hasilTeraBulanIni->where('hasil', 'Sah')->count();
+        $totalTeraBatal = $totalTeraDilakukan - $totalTeraSah;
 
         $totalPermohonan = PermohonanTera::whereBetween('tanggal_permohonan', [$startDate, $endDate])
                                         ->count();
@@ -94,8 +94,8 @@ class LaporanBulanan extends Model
         $detailPerJenis = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
                                   ->join('uttps', 'hasil_teras.uttp_id', '=', 'uttps.id')
                                   ->join('jenis_uttps', 'uttps.jenis_uttp_id', '=', 'jenis_uttps.id')
-                                  ->selectRaw('jenis_uttps.nama, COUNT(*) as total, 
-                                             SUM(CASE WHEN hasil_teras.hasil = "Lulus" THEN 1 ELSE 0 END) as lulus')
+                                  ->selectRaw('jenis_uttps.nama, COUNT(*) as total,
+                                             SUM(CASE WHEN hasil_teras.hasil = "Sah" THEN 1 ELSE 0 END) as sah')
                                   ->groupBy('jenis_uttps.id', 'jenis_uttps.nama')
                                   ->get()
                                   ->toArray();
@@ -106,7 +106,7 @@ class LaporanBulanan extends Model
                                    ->join('desas', 'uttps.desa_id', '=', 'desas.id')
                                    ->join('kecamatans', 'desas.kecamatan_id', '=', 'kecamatans.id')
                                    ->selectRaw('kecamatans.nama, COUNT(*) as total,
-                                              SUM(CASE WHEN hasil_teras.hasil = "Lulus" THEN 1 ELSE 0 END) as lulus')
+                                              SUM(CASE WHEN hasil_teras.hasil = "Sah" THEN 1 ELSE 0 END) as sah')
                                    ->groupBy('kecamatans.id', 'kecamatans.nama')
                                    ->get()
                                    ->toArray();
@@ -116,8 +116,8 @@ class LaporanBulanan extends Model
             [
                 'total_uttp_terdaftar' => $totalUttpTerdaftar,
                 'total_tera_dilakukan' => $totalTeraDilakukan,
-                'total_tera_lulus' => $totalTeraLulus,
-                'total_tera_tidak_lulus' => $totalTeraNotLulus,
+                'total_tera_sah' => $totalTeraSah,
+                'total_tera_batal' => $totalTeraBatal,
                 'total_permohonan' => $totalPermohonan,
                 'detail_per_jenis' => $detailPerJenis,
                 'detail_per_lokasi' => $detailPerLokasi,

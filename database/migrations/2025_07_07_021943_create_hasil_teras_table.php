@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('permohonan_tera_id')->constrained('permohonan_teras')->onDelete('cascade');
             $table->foreignId('uttp_id')->constrained('uttps')->onDelete('cascade');
-            $table->enum('hasil', ['Lulus', 'Tidak Lulus', 'Rusak', 'Tidak Layak']);
+            $table->enum('hasil', ['Sah', 'Batal', 'Rusak', 'Tidak Layak']);
             $table->date('tanggal_tera');
             $table->string('nomor_sertifikat', 50)->unique()->nullable();
             $table->date('tanggal_expired')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('catatan_hasil')->nullable();
             $table->json('foto_hasil')->nullable(); // Array path foto
             $table->timestamps();
-            
+
             $table->index(['hasil', 'tanggal_tera']);
             $table->index(['tanggal_expired', 'hasil']);
         });

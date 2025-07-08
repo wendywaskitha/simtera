@@ -14,7 +14,7 @@ class RecentActivitiesWidget extends BaseWidget
     protected static ?string $heading = 'Aktivitas Terbaru';
     protected static ?int $sort = 4;
     protected int | string | array $columnSpan = 'full';
-    
+
     public function table(Table $table): Table
     {
         return $table
@@ -30,32 +30,32 @@ class RecentActivitiesWidget extends BaseWidget
                     ->dateTime('d M, H:i')
                     ->sortable()
                     ->size('sm'),
-                    
+
                 Tables\Columns\TextColumn::make('activity_type')
                     ->label('Aktivitas')
                     ->formatStateUsing(fn () => 'Permohonan Tera')
                     ->badge()
                     ->color('info')
                     ->icon('heroicon-o-document-plus'),
-                    
+
                 Tables\Columns\TextColumn::make('nomor_permohonan')
                     ->label('Nomor')
                     ->searchable()
                     ->copyable()
                     ->size('sm'),
-                    
-                Tables\Columns\TextColumn::make('uttp.nama_pemilik')
+
+                Tables\Columns\TextColumn::make('uttp.pemilik.nama')
                     ->label('Pemilik')
                     ->searchable()
                     ->limit(20)
                     ->size('sm'),
-                    
+
                 Tables\Columns\TextColumn::make('uttp.jenisUttp.nama')
                     ->label('Jenis UTTP')
                     ->badge()
                     ->color('secondary')
                     ->size('sm'),
-                    
+
                 Tables\Columns\TextColumn::make('jenis_layanan')
                     ->label('Layanan')
                     ->badge()
@@ -66,7 +66,7 @@ class RecentActivitiesWidget extends BaseWidget
                         default => 'gray'
                     })
                     ->size('sm'),
-                    
+
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -79,7 +79,7 @@ class RecentActivitiesWidget extends BaseWidget
                         default => 'gray'
                     })
                     ->size('sm'),
-                    
+
                 Tables\Columns\TextColumn::make('uttp.desa.kecamatan.nama')
                     ->label('Kecamatan')
                     ->size('sm')
@@ -90,7 +90,7 @@ class RecentActivitiesWidget extends BaseWidget
                     ->label('Lihat')
                     ->icon('heroicon-o-eye')
                     ->size('sm')
-                    ->url(fn (PermohonanTera $record): string => 
+                    ->url(fn (PermohonanTera $record): string =>
                         \App\Filament\Resources\PermohonanTeraResource::getUrl('view', ['record' => $record])
                     )
                     ->openUrlInNewTab(),

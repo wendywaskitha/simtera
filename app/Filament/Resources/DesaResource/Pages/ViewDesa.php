@@ -38,30 +38,30 @@ class ViewDesa extends ViewRecord
                                     ->size('lg')
                                     ->weight('bold')
                                     ->color('primary'),
-                                    
+
                                 TextEntry::make('kecamatan.nama')
                                     ->label('Kecamatan')
                                     ->badge()
                                     ->color('primary'),
                             ]),
-                            
+
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('kode')
                                     ->label('Kode Desa')
                                     ->badge()
                                     ->color('gray'),
-                                    
+
                                 TextEntry::make('nama_lengkap')
                                     ->label('Nama Lengkap')
                                     ->weight('medium'),
                             ]),
-                            
+
                         TextEntry::make('keterangan')
                             ->label('Keterangan')
                             ->placeholder('Tidak ada keterangan')
                             ->columnSpanFull(),
-                            
+
                         Grid::make(3)
                             ->schema([
                                 TextEntry::make('jumlah_uttp')
@@ -69,14 +69,14 @@ class ViewDesa extends ViewRecord
                                     ->badge()
                                     ->color('success')
                                     ->icon('heroicon-o-scale'),
-                                    
+
                                 TextEntry::make('is_active')
                                     ->label('Status')
                                     ->badge()
                                     ->color(fn (bool $state): string => $state ? 'success' : 'danger')
                                     ->formatStateUsing(fn (bool $state): string => $state ? 'Aktif' : 'Tidak Aktif')
                                     ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
-                                    
+
                                 TextEntry::make('created_at')
                                     ->label('Dibuat Pada')
                                     ->dateTime('d M Y, H:i')
@@ -84,7 +84,7 @@ class ViewDesa extends ViewRecord
                             ]),
                     ])
                     ->columns(1),
-                    
+
                 Section::make('Daftar UTTP')
                     ->description('UTTP yang terdaftar di desa ini')
                     ->schema([
@@ -94,7 +94,7 @@ class ViewDesa extends ViewRecord
                                 if ($record->uttps->isEmpty()) {
                                     return 'Belum ada UTTP terdaftar';
                                 }
-                                
+
                                 return $record->uttps->take(10)->map(function ($uttp) {
                                     $statusIcon = match($uttp->status_tera) {
                                         'Aktif' => '✅',
@@ -102,7 +102,7 @@ class ViewDesa extends ViewRecord
                                         'Belum Tera' => '🔄',
                                         default => '❌'
                                     };
-                                    return "{$statusIcon} {$uttp->nama_pemilik} - {$uttp->jenisUttp->nama} ({$uttp->status_tera})";
+                                    return "{$statusIcon} {$uttp->pemilik->nama} - {$uttp->jenisUttp->nama} ({$uttp->status_tera})";
                                 })->join("\n") . ($record->uttps->count() > 10 ? "\n... dan " . ($record->uttps->count() - 10) . " UTTP lainnya" : '');
                             })
                             ->listWithLineBreaks(),

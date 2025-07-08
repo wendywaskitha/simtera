@@ -58,19 +58,19 @@ class ViewLaporanBulanan extends ViewRecord
                                     ->weight(FontWeight::Bold)
                                     ->color('primary')
                                     ->icon('heroicon-o-calendar'),
-                                    
-                                TextEntry::make('persentase_lulus')
+
+                                TextEntry::make('persentase_sah')
                                     ->label('Tingkat Keberhasilan')
                                     ->formatStateUsing(fn ($state) => $state . '%')
                                     ->badge()
-                                    ->color(fn ($state) => $state >= 90 ? 'success' : 
+                                    ->color(fn ($state) => $state >= 90 ? 'success' :
                                            ($state >= 75 ? 'warning' : 'danger'))
                                     ->size('lg')
                                     ->icon('heroicon-o-trophy'),
                             ]),
                     ])
                     ->columns(1),
-                    
+
                 Section::make('Statistik Utama')
                     ->description('Data statistik kinerja bulanan')
                     ->icon('heroicon-o-chart-pie')
@@ -83,21 +83,21 @@ class ViewLaporanBulanan extends ViewRecord
                                     ->badge()
                                     ->color('info')
                                     ->icon('heroicon-o-scale'),
-                                    
+
                                 TextEntry::make('total_tera_dilakukan')
                                     ->label('Tera Dilakukan')
                                     ->numeric()
                                     ->badge()
                                     ->color('warning')
                                     ->icon('heroicon-o-clipboard-document-check'),
-                                    
-                                TextEntry::make('total_tera_lulus')
-                                    ->label('Tera Lulus')
+
+                                TextEntry::make('total_tera_sah')
+                                    ->label('Tera Sah')
                                     ->numeric()
                                     ->badge()
                                     ->color('success')
                                     ->icon('heroicon-o-check-circle'),
-                                    
+
                                 TextEntry::make('total_permohonan')
                                     ->label('Total Permohonan')
                                     ->numeric()
@@ -107,7 +107,7 @@ class ViewLaporanBulanan extends ViewRecord
                             ]),
                     ])
                     ->columns(1),
-                    
+
                 Section::make('Analisis Per Jenis UTTP')
                     ->description('Breakdown berdasarkan jenis UTTP')
                     ->icon('heroicon-o-squares-2x2')
@@ -118,7 +118,7 @@ class ViewLaporanBulanan extends ViewRecord
                                 if (!$record->detail_per_jenis || !is_array($record->detail_per_jenis)) {
                                     return 'Data detail per jenis tidak tersedia';
                                 }
-                                
+
                                 return view('filament.components.detail-per-jenis-chart', [
                                     'data' => $record->detail_per_jenis
                                 ]);
@@ -126,7 +126,7 @@ class ViewLaporanBulanan extends ViewRecord
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Analisis Per Lokasi')
                     ->description('Breakdown berdasarkan kecamatan')
                     ->icon('heroicon-o-map')
@@ -137,7 +137,7 @@ class ViewLaporanBulanan extends ViewRecord
                                 if (!$record->detail_per_lokasi || !is_array($record->detail_per_lokasi)) {
                                     return 'Data detail per lokasi tidak tersedia';
                                 }
-                                
+
                                 return view('filament.components.detail-per-lokasi-chart', [
                                     'data' => $record->detail_per_lokasi
                                 ]);
@@ -145,7 +145,7 @@ class ViewLaporanBulanan extends ViewRecord
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Trend Analysis')
                     ->description('Analisis trend dan perbandingan')
                     ->icon('heroicon-o-chart-bar-square')
@@ -156,11 +156,11 @@ class ViewLaporanBulanan extends ViewRecord
                                 // Get previous month data for comparison
                                 $prevMonth = $record->bulan == 1 ? 12 : $record->bulan - 1;
                                 $prevYear = $record->bulan == 1 ? $record->tahun - 1 : $record->tahun;
-                                
+
                                 $prevReport = \App\Models\LaporanBulanan::where('tahun', $prevYear)
                                                                        ->where('bulan', $prevMonth)
                                                                        ->first();
-                                
+
                                 return view('filament.components.trend-analysis', [
                                     'current' => $record,
                                     'previous' => $prevReport
@@ -170,7 +170,7 @@ class ViewLaporanBulanan extends ViewRecord
                     ])
                     ->collapsible()
                     ->collapsed(false),
-                    
+
                 Section::make('Informasi Sistem')
                     ->description('Data audit dan tracking')
                     ->icon('heroicon-o-information-circle')
@@ -181,7 +181,7 @@ class ViewLaporanBulanan extends ViewRecord
                                     ->label('Laporan Dibuat')
                                     ->dateTime('d M Y, H:i')
                                     ->icon('heroicon-o-calendar'),
-                                    
+
                                 TextEntry::make('updated_at')
                                     ->label('Terakhir Diperbarui')
                                     ->dateTime('d M Y, H:i')

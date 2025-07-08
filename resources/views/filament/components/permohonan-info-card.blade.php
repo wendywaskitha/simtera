@@ -5,7 +5,7 @@
             <div class="space-y-1 text-sm">
                 <div><span class="font-medium">Nomor:</span> {{ $permohonan->nomor_permohonan }}</div>
                 <div><span class="font-medium">Jenis Layanan:</span> {{ $permohonan->jenis_layanan }}</div>
-                <div><span class="font-medium">Status:</span> 
+                <div><span class="font-medium">Status:</span>
                     <span class="px-2 py-1 rounded text-xs {{ $permohonan->status === 'Dijadwalkan' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800' }}">
                         {{ $permohonan->status }}
                     </span>
@@ -17,7 +17,7 @@
             <h4 class="font-semibold text-blue-900 dark:text-blue-100 mb-2">⚖️ Informasi UTTP</h4>
             <div class="space-y-1 text-sm">
                 <div><span class="font-medium">Kode:</span> {{ $permohonan->uttp->kode_uttp }}</div>
-                <div><span class="font-medium">Pemilik:</span> {{ $permohonan->uttp->nama_pemilik }}</div>
+                <div><span class="font-medium">Pemilik:</span> {{ $permohonan->uttp->pemilik->nama }}</div>
                 <div><span class="font-medium">Jenis:</span> {{ $permohonan->uttp->jenisUttp->nama }}</div>
                 <div><span class="font-medium">Lokasi:</span> {{ $permohonan->uttp->lokasi_lengkap }}</div>
             </div>

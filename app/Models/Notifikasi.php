@@ -120,7 +120,7 @@ class Notifikasi extends Model
     {
         return static::createNotifikasi(
             'Reminder Tera Ulang',
-            "UTTP {$uttp->kode_uttp} milik {$uttp->nama_pemilik} akan expired dalam 30 hari.",
+            "UTTP {$uttp->kode_uttp} milik {$uttp->pemilik->nama} akan expired dalam 30 hari.",
             'Email',
             $uttp->telepon_pemilik ?? 'admin',
             ['uttp_id' => $uttp->id]

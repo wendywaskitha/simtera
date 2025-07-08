@@ -25,17 +25,17 @@ class LaporanBulananResource extends Resource
     protected static ?string $model = LaporanBulanan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    
+
     protected static ?string $navigationLabel = 'Laporan Bulanan';
-    
+
     protected static ?string $modelLabel = 'Laporan Bulanan';
-    
+
     protected static ?string $pluralModelLabel = 'Laporan Bulanan';
-    
+
     protected static ?string $navigationGroup = 'Laporan';
-    
+
     protected static ?int $navigationSort = 1;
-    
+
     protected static ?string $recordTitleAttribute = 'periode_lengkap';
 
     public static function form(Form $form): Form
@@ -62,7 +62,7 @@ class LaporanBulananResource extends Resource
                                     ->default(date('Y'))
                                     ->live()
                                     ->prefixIcon('heroicon-o-calendar'),
-                                    
+
                                 Forms\Components\Select::make('bulan')
                                     ->label('Bulan')
                                     ->required()
@@ -76,14 +76,14 @@ class LaporanBulananResource extends Resource
                                     ->live()
                                     ->prefixIcon('heroicon-o-calendar-days'),
                             ]),
-                            
+
                         Forms\Components\Placeholder::make('preview_info')
                             ->label('Preview Laporan')
                             ->content(function (Forms\Get $get) {
                                 if (!$get('tahun') || !$get('bulan')) {
                                     return 'Pilih tahun dan bulan untuk melihat preview laporan';
                                 }
-                                
+
                                 $tahun = $get('tahun');
                                 $bulan = $get('bulan');
                                 $namaBulan = [
@@ -92,44 +92,44 @@ class LaporanBulananResource extends Resource
                                     7 => 'Juli', 8 => 'Agustus', 9 => 'September',
                                     10 => 'Oktober', 11 => 'November', 12 => 'Desember'
                                 ][$bulan];
-                                
+
                                 // Check if report already exists
                                 $existingReport = LaporanBulanan::where('tahun', $tahun)
                                                                ->where('bulan', $bulan)
                                                                ->first();
-                                
+
                                 if ($existingReport) {
                                     return view('filament.components.laporan-preview', [
                                         'laporan' => $existingReport,
                                         'isExisting' => true
                                     ]);
                                 }
-                                
+
                                 // Generate preview data
                                 $startDate = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth();
                                 $endDate = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
-                                
+
                                 $totalUttp = UTTP::whereYear('created_at', '<=', $tahun)
                                                  ->whereMonth('created_at', '<=', $bulan)
                                                  ->count();
-                                
+
                                 $totalTera = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
                                                      ->count();
-                                
-                                $totalLulus = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
-                                                      ->where('hasil', 'Lulus')
+
+                                $totalSah = HasilTera::whereBetween('tanggal_tera', [$startDate, $endDate])
+                                                      ->where('hasil', 'Sah')
                                                       ->count();
-                                
+
                                 return view('filament.components.laporan-preview', [
                                     'periode' => "{$namaBulan} {$tahun}",
                                     'total_uttp' => $totalUttp,
                                     'total_tera' => $totalTera,
-                                    'total_lulus' => $totalLulus,
+                                    'total_sah' => $totalSah,
                                     'isExisting' => false
                                 ]);
                             })
                             ->columnSpanFull(),
-                            
+
                         Forms\Components\Toggle::make('auto_generate')
                             ->label('Generate Otomatis')
                             ->default(true)
@@ -137,7 +137,7 @@ class LaporanBulananResource extends Resource
                             ->inline(false),
                     ])
                     ->columns(1),
-                    
+
                 Forms\Components\Section::make('Data Manual (Opsional)')
                     ->description('Override data otomatis jika diperlukan')
                     ->icon('heroicon-o-pencil-square')
@@ -149,29 +149,29 @@ class LaporanBulananResource extends Resource
                                     ->numeric()
                                     ->placeholder('Auto-calculated')
                                     ->helperText('Kosongkan untuk auto-calculate'),
-                                    
+
                                 Forms\Components\TextInput::make('total_tera_dilakukan')
                                     ->label('Total Tera Dilakukan')
                                     ->numeric()
                                     ->placeholder('Auto-calculated')
                                     ->helperText('Kosongkan untuk auto-calculate'),
-                                    
+
                                 Forms\Components\TextInput::make('total_permohonan')
                                     ->label('Total Permohonan')
                                     ->numeric()
                                     ->placeholder('Auto-calculated')
                                     ->helperText('Kosongkan untuk auto-calculate'),
                             ]),
-                            
+
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('total_tera_lulus')
-                                    ->label('Total Tera Lulus')
+                                Forms\Components\TextInput::make('total_tera_sah')
+                                    ->label('Total Tera Sah')
                                     ->numeric()
                                     ->placeholder('Auto-calculated'),
-                                    
-                                Forms\Components\TextInput::make('total_tera_tidak_lulus')
-                                    ->label('Total Tera Tidak Lulus')
+
+                                Forms\Components\TextInput::make('total_tera_batal')
+                                    ->label('Total Tera Batal')
                                     ->numeric()
                                     ->placeholder('Auto-calculated'),
                             ]),
@@ -193,42 +193,42 @@ class LaporanBulananResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->icon('heroicon-o-calendar')
                     ->color('primary'),
-                    
+
                 Tables\Columns\TextColumn::make('total_uttp_terdaftar')
                     ->label('Total UTTP')
                     ->numeric()
                     ->badge()
                     ->color('info')
                     ->icon('heroicon-o-scale'),
-                    
+
                 Tables\Columns\TextColumn::make('total_tera_dilakukan')
                     ->label('Tera Dilakukan')
                     ->numeric()
                     ->badge()
                     ->color('warning')
                     ->icon('heroicon-o-clipboard-document-check'),
-                    
-                Tables\Columns\TextColumn::make('total_tera_lulus')
-                    ->label('Tera Lulus')
+
+                Tables\Columns\TextColumn::make('total_tera_batal')
+                    ->label('Batal')
                     ->numeric()
                     ->badge()
                     ->color('success')
                     ->icon('heroicon-o-check-circle'),
-                    
-                Tables\Columns\TextColumn::make('persentase_lulus')
-                    ->label('% Lulus')
+
+                Tables\Columns\TextColumn::make('persentase_sah')
+                    ->label('% Sah')
                     ->badge()
-                    ->color(fn ($record) => $record->persentase_lulus >= 90 ? 'success' : 
-                           ($record->persentase_lulus >= 75 ? 'warning' : 'danger'))
+                    ->color(fn ($record) => $record->persentase_sah >= 90 ? 'success' :
+                           ($record->persentase_sah >= 75 ? 'warning' : 'danger'))
                     ->formatStateUsing(fn ($state) => $state . '%'),
-                    
+
                 Tables\Columns\TextColumn::make('total_permohonan')
                     ->label('Permohonan')
                     ->numeric()
                     ->badge()
                     ->color('gray')
                     ->toggleable(),
-                    
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')
@@ -244,7 +244,7 @@ class LaporanBulananResource extends Resource
                                            ->pluck('tahun', 'tahun')
                                            ->toArray();
                     }),
-                    
+
                 SelectFilter::make('bulan')
                     ->label('Bulan')
                     ->options([
@@ -253,13 +253,13 @@ class LaporanBulananResource extends Resource
                         7 => 'Juli', 8 => 'Agustus', 9 => 'September',
                         10 => 'Oktober', 11 => 'November', 12 => 'Desember'
                     ]),
-                    
+
                 Filter::make('high_performance')
                     ->label('Performa Tinggi (≥90%)')
-                    ->query(fn (Builder $query): Builder => 
-                        $query->whereRaw('(total_tera_lulus / total_tera_dilakukan * 100) >= 90'))
+                    ->query(fn (Builder $query): Builder =>
+                        $query->whereRaw('(total_tera_sah / total_tera_dilakukan * 100) >= 90'))
                     ->toggle(),
-                    
+
                 Filter::make('current_year')
                     ->label('Tahun Ini')
                     ->query(fn (Builder $query): Builder => $query->where('tahun', date('Y')))
@@ -320,13 +320,13 @@ class LaporanBulananResource extends Resource
                                     ->send();
                                 return;
                             }
-                            
+
                             $generated = 0;
                             $records->each(function ($record) use (&$generated) {
                                 LaporanBulanan::generateLaporan($record->tahun, $record->bulan);
                                 $generated++;
                             });
-                            
+
                             Notification::make()
                                 ->title("Berhasil generate ulang {$generated} laporan")
                                 ->success()
@@ -345,11 +345,11 @@ class LaporanBulananResource extends Resource
                                     ->send();
                                 return;
                             }
-                            
+
                             return response()->streamDownload(function () use ($records) {
-                                echo "Periode,Total UTTP,Tera Dilakukan,Tera Lulus,Persentase Lulus,Total Permohonan\n";
+                                echo "Periode,Total UTTP,Tera Dilakukan,Tera Sah,Persentase Sah,Total Permohonan\n";
                                 foreach ($records as $record) {
-                                    echo "{$record->periode_lengkap},{$record->total_uttp_terdaftar},{$record->total_tera_dilakukan},{$record->total_tera_lulus},{$record->persentase_lulus}%,{$record->total_permohonan}\n";
+                                    echo "{$record->periode_lengkap},{$record->total_uttp_terdaftar},{$record->total_tera_dilakukan},{$record->sah},{$record->persentase_sah}%,{$record->total_permohonan}\n";
                                 }
                             }, 'laporan-bulanan-gabungan-' . date('Y-m-d') . '.csv');
                         }),
@@ -370,23 +370,23 @@ class LaporanBulananResource extends Resource
             'edit' => Pages\EditLaporanBulanan::route('/{record}/edit'),
         ];
     }
-    
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('tahun', date('Y'))->count();
     }
-    
+
     public static function getGlobalSearchResultTitle(Model $record): string
     {
         return 'Laporan ' . $record->periode_lengkap;
     }
-    
+
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             'Total UTTP' => $record->total_uttp_terdaftar,
-            'Tera Lulus' => $record->total_tera_lulus,
-            'Persentase' => $record->persentase_lulus . '%',
+            'Tera Sah' => $record->total_tera_sah,
+            'Persentase' => $record->persentase_sah . '%',
         ];
     }
 }

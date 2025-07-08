@@ -13,7 +13,7 @@ use Carbon\Carbon;
 class StatsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
-    
+
     protected function getStats(): array
     {
         // Data statistik utama
@@ -21,25 +21,25 @@ class StatsOverviewWidget extends BaseWidget
         $uttpAktif = UTTP::where('status_tera', 'Aktif')->count();
         $uttpExpiredSoon = UTTP::expiredSoon(30)->count();
         $permohonanPending = PermohonanTera::where('status', 'Pending')->count();
-        
+
         // Data bulan ini
         $startMonth = Carbon::now()->startOfMonth();
         $endMonth = Carbon::now()->endOfMonth();
-        
+
         $teraBulanIni = HasilTera::whereBetween('tanggal_tera', [$startMonth, $endMonth])->count();
-        $teraLulusBulanIni = HasilTera::whereBetween('tanggal_tera', [$startMonth, $endMonth])
-                                    ->where('hasil', 'Lulus')->count();
-        
-        $persentaseLulus = $teraBulanIni > 0 ? round(($teraLulusBulanIni / $teraBulanIni) * 100, 1) : 0;
-        
+        $teraSahBulanIni = HasilTera::whereBetween('tanggal_tera', [$startMonth, $endMonth])
+                                    ->where('hasil', 'Sah')->count();
+
+        $persentaseSah = $teraBulanIni > 0 ? round(($teraSahBulanIni / $teraBulanIni) * 100, 1) : 0;
+
         // Trend calculations
         $lastMonth = Carbon::now()->subMonth();
         $teraLastMonth = HasilTera::whereBetween('tanggal_tera', [
-            $lastMonth->startOfMonth(), 
+            $lastMonth->startOfMonth(),
             $lastMonth->endOfMonth()
         ])->count();
-        
-        $trendTera = $teraLastMonth > 0 ? 
+
+        $trendTera = $teraLastMonth > 0 ?
             round((($teraBulanIni - $teraLastMonth) / $teraLastMonth) * 100, 1) : 0;
 
         return [
@@ -52,7 +52,7 @@ class StatsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer',
                     'wire:click' => '$dispatch("filterUttp", { filter: "all" })'
                 ]),
-                
+
             Stat::make('UTTP Tera Aktif', number_format($uttpAktif))
                 ->description('Memiliki sertifikat tera valid')
                 ->descriptionIcon('heroicon-m-check-circle')
@@ -62,7 +62,7 @@ class StatsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer',
                     'wire:click' => '$dispatch("filterUttp", { filter: "aktif" })'
                 ]),
-                
+
             Stat::make('Akan Expired', number_format($uttpExpiredSoon))
                 ->description('Dalam 30 hari ke depan')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
@@ -72,7 +72,7 @@ class StatsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer',
                     'wire:click' => '$dispatch("filterUttp", { filter: "expired_soon" })'
                 ]),
-                
+
             Stat::make('Permohonan Pending', number_format($permohonanPending))
                 ->description('Menunggu persetujuan')
                 ->descriptionIcon('heroicon-m-clock')
@@ -82,18 +82,18 @@ class StatsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer',
                     'wire:click' => '$dispatch("filterPermohonan", { filter: "pending" })'
                 ]),
-                
+
             Stat::make('Tera Bulan Ini', number_format($teraBulanIni))
                 ->description($trendTera >= 0 ? "+{$trendTera}% dari bulan lalu" : "{$trendTera}% dari bulan lalu")
                 ->descriptionIcon($trendTera >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($trendTera >= 0 ? 'success' : 'danger')
                 ->chart([10, 15, 20, 18, 25, 22, $teraBulanIni % 30]),
-                
-            Stat::make('Tingkat Keberhasilan', $persentaseLulus . '%')
-                ->description('Persentase tera lulus bulan ini')
+
+            Stat::make('Tingkat Keberhasilan', $persentaseSah . '%')
+                ->description('Persentase tera Sah bulan ini')
                 ->descriptionIcon('heroicon-m-trophy')
-                ->color($persentaseLulus >= 90 ? 'success' : ($persentaseLulus >= 75 ? 'warning' : 'danger'))
-                ->chart([85, 88, 92, 89, 95, 91, $persentaseLulus]),
+                ->color($persentaseSah >= 90 ? 'success' : ($persentaseSah >= 75 ? 'warning' : 'danger'))
+                ->chart([85, 88, 92, 89, 95, 91, $persentaseSah]),
         ];
     }
 }

@@ -23,17 +23,17 @@ class PermohonanTeraResource extends Resource
     protected static ?string $model = PermohonanTera::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    
+
     protected static ?string $navigationLabel = 'Permohonan Tera';
-    
+
     protected static ?string $modelLabel = 'Permohonan Tera';
-    
+
     protected static ?string $pluralModelLabel = 'Permohonan Tera';
-    
+
     protected static ?string $navigationGroup = 'Pelayanan';
-    
+
     protected static ?int $navigationSort = 1;
-    
+
     protected static ?string $recordTitleAttribute = 'nomor_permohonan';
 
     public static function form(Form $form): Form
@@ -50,7 +50,7 @@ class PermohonanTeraResource extends Resource
                                     Forms\Components\Select::make('uttp_id')
                                         ->label('Pilih UTTP')
                                         ->relationship('uttp', 'kode_uttp')
-                                        ->searchable(['kode_uttp', 'nama_pemilik', 'nomor_seri'])
+                                        ->searchable(['kode_uttp', 'pemilik.nama', 'nomor_seri'])
                                         ->preload()
                                         ->required()
                                         ->live()
@@ -62,27 +62,27 @@ class PermohonanTeraResource extends Resource
                                                 }
                                             }
                                         })
-                                        ->getOptionLabelFromRecordUsing(fn (UTTP $record) => "{$record->kode_uttp} - {$record->nama_pemilik} ({$record->jenisUttp->nama})")
+                                        ->getOptionLabelFromRecordUsing(fn (UTTP $record) => "{$record->kode_uttp} - {$record->pemilik->nama} ({$record->jenisUttp->nama})")
                                         ->placeholder('Cari berdasarkan kode UTTP, nama pemilik, atau nomor seri')
                                         ->helperText('Pilih UTTP yang akan diajukan untuk tera/tera ulang'),
-                                        
+
                                     Forms\Components\Placeholder::make('uttp_info')
                                         ->label('Informasi UTTP')
                                         ->content(function (Forms\Get $get) {
                                             if (!$get('uttp_id')) {
                                                 return 'Pilih UTTP terlebih dahulu untuk melihat informasi detail';
                                             }
-                                            
+
                                             $uttp = UTTP::find($get('uttp_id'));
                                             if (!$uttp) return 'UTTP tidak ditemukan';
-                                            
+
                                             return view('filament.components.uttp-info-card', compact('uttp'));
                                         })
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(1),
                         ]),
-                        
+
                     Forms\Components\Wizard\Step::make('Jenis Layanan')
                         ->description('Tentukan jenis layanan tera')
                         ->icon('heroicon-o-cog-6-tooth')
@@ -110,7 +110,7 @@ class PermohonanTeraResource extends Resource
                                         })
                                         ->inline(false)
                                         ->columnSpanFull(),
-                                        
+
                                     Forms\Components\Section::make('Informasi Layanan')
                                         ->schema([
                                             Forms\Components\Placeholder::make('layanan_detail')
@@ -131,7 +131,7 @@ class PermohonanTeraResource extends Resource
                                 ])
                                 ->columns(1),
                         ]),
-                        
+
                     Forms\Components\Wizard\Step::make('Dokumen & Jadwal')
                         ->description('Upload dokumen dan pilih jadwal')
                         ->icon('heroicon-o-document-arrow-up')
@@ -146,7 +146,7 @@ class PermohonanTeraResource extends Resource
                                         ->maxSize(5120)                 // 5 MB
                                         ->downloadable()                // link unduh otomatis
                                         ->previewable()
-                                        ->helperText('PDF/JPG/PNG, maks 5 MB'),    
+                                        ->helperText('PDF/JPG/PNG, maks 5 MB'),
                                     Forms\Components\Placeholder::make('dokumen_info')
                                         ->label('Informasi Dokumen')
                                         ->content('Untuk layanan sidang tera di pasar, tidak diperlukan surat permohonan karena dilakukan secara massal.')
@@ -154,7 +154,7 @@ class PermohonanTeraResource extends Resource
                                         ->columnSpanFull(),
                                 ])
                                 ->columns(1),
-                                
+
                             Forms\Components\Section::make('Jadwal & Catatan')
                                 ->schema([
                                     Forms\Components\DatePicker::make('tanggal_permohonan')
@@ -163,13 +163,13 @@ class PermohonanTeraResource extends Resource
                                         ->default(now())
                                         ->minDate(now())
                                         ->prefixIcon('heroicon-o-calendar'),
-                                        
+
                                     Forms\Components\DatePicker::make('tanggal_jadwal')
                                         ->label('Tanggal Jadwal Diinginkan')
                                         ->minDate(now()->addDay())
                                         ->prefixIcon('heroicon-o-calendar')
                                         ->helperText('Kosongkan jika tidak ada preferensi jadwal khusus'),
-                                        
+
                                     Forms\Components\Textarea::make('catatan_pemohon')
                                         ->label('Catatan Pemohon')
                                         ->rows(4)
@@ -178,7 +178,7 @@ class PermohonanTeraResource extends Resource
                                 ])
                                 ->columns(2),
                         ]),
-                        
+
                     Forms\Components\Wizard\Step::make('Review & Submit')
                         ->description('Review permohonan sebelum submit')
                         ->icon('heroicon-o-check-circle')
@@ -191,11 +191,11 @@ class PermohonanTeraResource extends Resource
                                             if (!$get('uttp_id')) {
                                                 return 'Data permohonan belum lengkap';
                                             }
-                                            
+
                                             $uttp = UTTP::find($get('uttp_id'));
                                             $jenis = $get('jenis_layanan');
                                             $tanggal = $get('tanggal_permohonan');
-                                            
+
                                             return view('filament.components.permohonan-review', [
                                                 'uttp' => $uttp,
                                                 'jenis_layanan' => $jenis,
@@ -206,7 +206,7 @@ class PermohonanTeraResource extends Resource
                                             ]);
                                         })
                                         ->columnSpanFull(),
-                                        
+
                                     Forms\Components\Checkbox::make('konfirmasi')
                                         ->label('Konfirmasi Data')
                                         ->helperText('Saya menyatakan bahwa data yang dimasukkan sudah benar dan sesuai')
@@ -227,6 +227,7 @@ class PermohonanTeraResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['uttp.pemilik']))
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_permohonan')
                     ->label('Nomor Permohonan')
@@ -237,30 +238,30 @@ class PermohonanTeraResource extends Resource
                     ->copyMessage('Nomor permohonan disalin!')
                     ->badge()
                     ->color('primary'),
-                    
-                Tables\Columns\TextColumn::make('uttp.nama_pemilik')
+
+                Tables\Columns\TextColumn::make('uttp.pemilik.nama')
                     ->label('Nama Pemilik')
                     ->searchable()
                     ->sortable()
                     ->icon('heroicon-o-user')
                     ->limit(25)
                     ->tooltip(function (PermohonanTera $record): ?string {
-                        return $record->uttp->nama_pemilik;
+                        return $record->uttp->pemilik->nama;
                     }),
-                    
+
                 Tables\Columns\TextColumn::make('uttp.kode_uttp')
                     ->label('Kode UTTP')
                     ->searchable()
                     ->badge()
                     ->color('gray')
                     ->copyable(),
-                    
+
                 Tables\Columns\TextColumn::make('uttp.jenisUttp.nama')
                     ->label('Jenis UTTP')
                     ->badge()
                     ->color('info')
                     ->icon('heroicon-o-squares-2x2'),
-                    
+
                 Tables\Columns\BadgeColumn::make('jenis_layanan')
                     ->label('Jenis Layanan')
                     ->colors([
@@ -273,7 +274,7 @@ class PermohonanTeraResource extends Resource
                         'heroicon-o-truck' => 'Luar Kantor',
                         'heroicon-o-building-storefront' => 'Sidang Tera',
                     ]),
-                    
+
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
                     ->colors([
@@ -290,13 +291,13 @@ class PermohonanTeraResource extends Resource
                         'heroicon-o-check-badge' => 'Selesai',
                         'heroicon-o-x-circle' => 'Ditolak',
                     ]),
-                    
+
                 Tables\Columns\TextColumn::make('tanggal_permohonan')
                     ->label('Tgl Permohonan')
                     ->date('d M Y')
                     ->sortable()
                     ->icon('heroicon-o-calendar'),
-                    
+
                 Tables\Columns\TextColumn::make('tanggal_jadwal')
                     ->label('Tgl Jadwal')
                     ->date('d M Y')
@@ -307,13 +308,13 @@ class PermohonanTeraResource extends Resource
                         return $record->tanggal_jadwal->isPast() ? 'danger' : 'success';
                     })
                     ->icon('heroicon-o-calendar-days'),
-                    
+
                 Tables\Columns\TextColumn::make('petugas_assigned')
                     ->label('Petugas')
                     ->placeholder('Belum ditugaskan')
                     ->icon('heroicon-o-user')
                     ->toggleable(),
-                    
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
                     ->dateTime('d M Y H:i')
@@ -331,7 +332,7 @@ class PermohonanTeraResource extends Resource
                         'Ditolak' => 'Ditolak',
                     ])
                     ->multiple(),
-                    
+
                 SelectFilter::make('jenis_layanan')
                     ->label('Jenis Layanan')
                     ->options([
@@ -339,12 +340,12 @@ class PermohonanTeraResource extends Resource
                         'Luar Kantor' => 'Luar Kantor',
                         'Sidang Tera' => 'Sidang Tera',
                     ]),
-                    
+
                 SelectFilter::make('petugas_assigned')
                     ->label('Petugas')
                     ->options(fn () => Petugas::aktif()->pluck('nama', 'nama'))
                     ->searchable(),
-                    
+
                 Filter::make('tanggal_permohonan')
                     ->form([
                         Forms\Components\DatePicker::make('dari')
@@ -357,12 +358,12 @@ class PermohonanTeraResource extends Resource
                             ->when($data['dari'], fn (Builder $query, $date): Builder => $query->whereDate('tanggal_permohonan', '>=', $date))
                             ->when($data['sampai'], fn (Builder $query, $date): Builder => $query->whereDate('tanggal_permohonan', '<=', $date));
                     }),
-                    
+
                 Filter::make('pending_approval')
                     ->label('Perlu Persetujuan')
                     ->query(fn (Builder $query): Builder => $query->where('status', 'Pending'))
                     ->toggle(),
-                    
+
                 Filter::make('scheduled_today')
                     ->label('Jadwal Hari Ini')
                     ->query(fn (Builder $query): Builder => $query->whereDate('tanggal_jadwal', today()))
@@ -455,13 +456,13 @@ class PermohonanTeraResource extends Resource
                         ->label('Download Semua Dokumen')
                         ->icon('heroicon-o-archive-box-arrow-down')
                         ->color('success')
-                        ->url(fn (PermohonanTera $record) => 
-                            is_array($record->dokumen_pendukung) && count($record->dokumen_pendukung) > 1 
-                                ? route('download.dokumen.multiple', $record) 
+                        ->url(fn (PermohonanTera $record) =>
+                            is_array($record->dokumen_pendukung) && count($record->dokumen_pendukung) > 1
+                                ? route('download.dokumen.multiple', $record)
                                 : null
                         )
                         ->openUrlInNewTab()
-                        ->visible(fn (PermohonanTera $record) => 
+                        ->visible(fn (PermohonanTera $record) =>
                             is_array($record->dokumen_pendukung) && count($record->dokumen_pendukung) > 1
                         ),
                     Tables\Actions\DeleteAction::make()
@@ -478,7 +479,7 @@ class PermohonanTeraResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->visible(function ($records) {
                             if (!$records) return false;
-                            
+
                             // Pastikan $records adalah collection
                             $collection = collect($records);
                             return $collection->every(fn ($record) => $record->status === 'Pending');
@@ -490,7 +491,7 @@ class PermohonanTeraResource extends Resource
                         ->action(function ($records) {
                             // Validasi dan konversi ke collection
                             $collection = collect($records ?? []);
-                            
+
                             if ($collection->isEmpty()) {
                                 Notification::make()
                                     ->title('Tidak ada record yang dipilih')
@@ -498,7 +499,7 @@ class PermohonanTeraResource extends Resource
                                     ->send();
                                 return;
                             }
-                            
+
                             $updated = 0;
                             $collection->each(function ($record) use (&$updated) {
                                 if ($record && $record->status === 'Pending') {
@@ -506,7 +507,7 @@ class PermohonanTeraResource extends Resource
                                     $updated++;
                                 }
                             });
-                            
+
                             if ($updated > 0) {
                                 Notification::make()
                                     ->title("Berhasil menyetujui {$updated} permohonan")
@@ -536,17 +537,17 @@ class PermohonanTeraResource extends Resource
             'edit' => Pages\EditPermohonanTera::route('/{record}/edit'),
         ];
     }
-    
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('status', 'Pending')->count();
     }
-    
+
     public static function getGlobalSearchResultTitle(Model $record): string
     {
-        return $record->nomor_permohonan . ' - ' . $record->uttp->nama_pemilik;
+        return $record->nomor_permohonan . ' - ' . $record->uttp->pemilik->nama;
     }
-    
+
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [

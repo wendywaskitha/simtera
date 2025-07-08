@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\UTTP;
+use App\Models\Pemilik;
 use App\Models\JenisUTTP;
 use App\Models\Desa;
 use App\Models\Pasar;
@@ -12,19 +13,21 @@ class UTTPSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil data referensi dengan Query Builder (bukan Collection)
+        // Ambil data referensi
         $jenisUttps = JenisUTTP::where('is_active', true)->get();
         $desas = Desa::where('is_active', true)->get();
         $pasars = Pasar::where('is_active', true)->get();
-        
-        // Data sample UTTP
+
+        // Data sample UTTP dengan pemilik yang dinormalisasi
         $uttps = [
             // UTTP di Pasar
             [
-                'nama_pemilik' => 'Hj. Siti Aminah',
-                'nik_pemilik' => '7413010101850001',
-                'telepon_pemilik' => '081234567001',
-                'alamat_pemilik' => 'Jl. Pasar Raha No. 15',
+                'pemilik' => [
+                    'nama' => 'Hj. Siti Aminah',
+                    'nik' => '7413010101850001',
+                    'telepon' => '081234567001',
+                    'alamat' => 'Jl. Pasar Raha No. 15',
+                ],
                 'jenis_uttp' => 'Timbangan Digital',
                 'merk' => 'Camry',
                 'tipe' => 'ACS-30',
@@ -44,10 +47,12 @@ class UTTPSeeder extends Seeder
                 'petugas_tera' => 'Ir. Muhammad Ridwan',
             ],
             [
-                'nama_pemilik' => 'Pak Usman',
-                'nik_pemilik' => '7413020202800002',
-                'telepon_pemilik' => '081234567002',
-                'alamat_pemilik' => 'Jl. Pasar Kusambi No. 8',
+                'pemilik' => [
+                    'nama' => 'Pak Usman',
+                    'nik' => '7413020202800002',
+                    'telepon' => '081234567002',
+                    'alamat' => 'Jl. Pasar Kusambi No. 8',
+                ],
                 'jenis_uttp' => 'Timbangan Mekanik',
                 'merk' => 'Henher',
                 'tipe' => 'TBI-150',
@@ -66,13 +71,42 @@ class UTTPSeeder extends Seeder
                 'nomor_sertifikat' => 'CERT-2023-045',
                 'petugas_tera' => 'S.T. Andi Kurniawan',
             ],
-            
+
+            // UTTP kedua untuk Hj. Siti Aminah (menunjukkan relasi one-to-many)
+            [
+                'pemilik' => [
+                    'nama' => 'Hj. Siti Aminah', // Pemilik yang sama
+                    'nik' => '7413010101850001',
+                    'telepon' => '081234567001',
+                    'alamat' => 'Jl. Pasar Raha No. 15',
+                ],
+                'jenis_uttp' => 'Timbangan Digital',
+                'merk' => 'Camry',
+                'tipe' => 'ACS-15',
+                'nomor_seri' => 'CAM006',
+                'kapasitas_maksimum' => 15.000,
+                'daya_baca' => 0.005,
+                'tahun_pembuatan' => 2021,
+                'desa' => 'Sawerigadi',
+                'alamat_lengkap' => 'Pasar Sentral Raha, Kios A-16',
+                'lokasi_type' => 'Pasar',
+                'detail_lokasi' => 'Kios A-16',
+                'pasar' => 'Pasar Sentral Raha',
+                'status_tera' => 'Aktif',
+                'tanggal_tera_terakhir' => '2024-02-10',
+                'tanggal_expired' => '2025-02-10',
+                'nomor_sertifikat' => 'CERT-2024-012',
+                'petugas_tera' => 'Ir. Muhammad Ridwan',
+            ],
+
             // UTTP Luar Pasar (SPBU)
             [
-                'nama_pemilik' => 'PT. Pertamina Retail',
-                'nik_pemilik' => null,
-                'telepon_pemilik' => '081234567003',
-                'alamat_pemilik' => 'Jl. Raya Raha-Baubau KM 5',
+                'pemilik' => [
+                    'nama' => 'PT. Pertamina Retail',
+                    'nik' => null,
+                    'telepon' => '081234567003',
+                    'alamat' => 'Jl. Raya Raha-Baubau KM 5',
+                ],
                 'jenis_uttp' => 'Takaran BBM',
                 'merk' => 'Tokico',
                 'tipe' => 'FRO-0631',
@@ -92,10 +126,12 @@ class UTTPSeeder extends Seeder
                 'petugas_tera' => 'Ir. Muhammad Ridwan',
             ],
             [
-                'nama_pemilik' => 'CV. Shell Indonesia',
-                'nik_pemilik' => null,
-                'telepon_pemilik' => '081234567004',
-                'alamat_pemilik' => 'Jl. Trans Sulawesi KM 12',
+                'pemilik' => [
+                    'nama' => 'CV. Shell Indonesia',
+                    'nik' => null,
+                    'telepon' => '081234567004',
+                    'alamat' => 'Jl. Trans Sulawesi KM 12',
+                ],
                 'jenis_uttp' => 'Takaran BBM',
                 'merk' => 'Wayne',
                 'tipe' => 'Helix-6000',
@@ -114,13 +150,15 @@ class UTTPSeeder extends Seeder
                 'nomor_sertifikat' => null,
                 'petugas_tera' => null,
             ],
-            
+
             // UTTP Toko/Usaha
             [
-                'nama_pemilik' => 'Toko Makmur Jaya',
-                'nik_pemilik' => '7413030303750003',
-                'telepon_pemilik' => '081234567005',
-                'alamat_pemilik' => 'Jl. Pendidikan No. 25',
+                'pemilik' => [
+                    'nama' => 'Toko Makmur Jaya',
+                    'nik' => '7413030303750003',
+                    'telepon' => '081234567005',
+                    'alamat' => 'Jl. Pendidikan No. 25',
+                ],
                 'jenis_uttp' => 'Timbangan Digital',
                 'merk' => 'Acis',
                 'tipe' => 'A12E',
@@ -140,32 +178,66 @@ class UTTPSeeder extends Seeder
                 'petugas_tera' => 'Siti Nurhaliza, S.Kom',
             ],
         ];
-        
+
+        // Array untuk menyimpan pemilik yang sudah dibuat
+        $createdPemiliks = [];
+
         foreach ($uttps as $uttpData) {
             // Cari jenis UTTP
             $jenisUttp = $jenisUttps->where('nama', $uttpData['jenis_uttp'])->first();
             if (!$jenisUttp) {
-                continue; // Skip jika jenis UTTP tidak ditemukan
+                $this->command->warn("Jenis UTTP '{$uttpData['jenis_uttp']}' tidak ditemukan. Melewati data ini.");
+                continue;
             }
-            
+
             // Cari desa
             $desa = $desas->where('nama', $uttpData['desa'])->first();
             if (!$desa) {
-                continue; // Skip jika desa tidak ditemukan
+                $this->command->warn("Desa '{$uttpData['desa']}' tidak ditemukan. Melewati data ini.");
+                continue;
             }
-            
+
             // Cari pasar jika lokasi type adalah Pasar
             $pasar = null;
             if ($uttpData['lokasi_type'] === 'Pasar' && $uttpData['pasar']) {
                 $pasar = $pasars->where('nama', $uttpData['pasar'])->first();
+                if (!$pasar) {
+                    $this->command->warn("Pasar '{$uttpData['pasar']}' tidak ditemukan. Melewati data ini.");
+                    continue;
+                }
             }
-            
+
+            // Cari atau buat pemilik
+            $pemilikData = $uttpData['pemilik'];
+            $pemilikKey = $pemilikData['nama'] . '|' . ($pemilikData['nik'] ?? 'no-nik');
+
+            if (!isset($createdPemiliks[$pemilikKey])) {
+                // Cek apakah pemilik sudah ada di database
+                $existingPemilik = Pemilik::where('nama', $pemilikData['nama'])
+                    ->where('nik', $pemilikData['nik'])
+                    ->first();
+
+                if ($existingPemilik) {
+                    $createdPemiliks[$pemilikKey] = $existingPemilik;
+                } else {
+                    // Buat pemilik baru
+                    $createdPemiliks[$pemilikKey] = Pemilik::create([
+                        'nama' => $pemilikData['nama'],
+                        'nik' => $pemilikData['nik'],
+                        'telepon' => $pemilikData['telepon'],
+                        'alamat' => $pemilikData['alamat'],
+                        'is_active' => true,
+                    ]);
+
+                    $this->command->info("Pemilik '{$pemilikData['nama']}' berhasil dibuat.");
+                }
+            }
+
+            $pemilik = $createdPemiliks[$pemilikKey];
+
             // Buat UTTP
-            UTTP::create([
-                'nama_pemilik' => $uttpData['nama_pemilik'],
-                'nik_pemilik' => $uttpData['nik_pemilik'],
-                'telepon_pemilik' => $uttpData['telepon_pemilik'],
-                'alamat_pemilik' => $uttpData['alamat_pemilik'],
+            $uttp = UTTP::create([
+                'pemilik_id' => $pemilik->id,
                 'jenis_uttp_id' => $jenisUttp->id,
                 'merk' => $uttpData['merk'],
                 'tipe' => $uttpData['tipe'],
@@ -174,7 +246,6 @@ class UTTPSeeder extends Seeder
                 'daya_baca' => $uttpData['daya_baca'],
                 'tahun_pembuatan' => $uttpData['tahun_pembuatan'],
                 'desa_id' => $desa->id,
-                'pasar_id' => $pasar?->id,
                 'alamat_lengkap' => $uttpData['alamat_lengkap'],
                 'lokasi_type' => $uttpData['lokasi_type'],
                 'detail_lokasi' => $uttpData['detail_lokasi'],
@@ -185,6 +256,10 @@ class UTTPSeeder extends Seeder
                 'petugas_tera' => $uttpData['petugas_tera'],
                 'is_active' => true,
             ]);
+
+            $this->command->info("UTTP '{$uttp->kode_uttp}' berhasil dibuat untuk pemilik '{$pemilik->nama}'.");
         }
+
+        $this->command->info('Seeder UTTP selesai dijalankan.');
     }
 }

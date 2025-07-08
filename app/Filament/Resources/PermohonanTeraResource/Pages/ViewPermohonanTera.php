@@ -65,14 +65,14 @@ class ViewPermohonanTera extends ViewRecord
                                     'Selesai' => ['icon' => '🎉', 'color' => 'success', 'desc' => 'Tera selesai'],
                                     'Ditolak' => ['icon' => '❌', 'color' => 'danger', 'desc' => 'Permohonan ditolak'],
                                 ];
-                                
+
                                 $currentStatus = $record->status;
                                 $result = [];
-                                
+
                                 foreach ($timeline as $status => $info) {
                                     $isActive = $status === $currentStatus;
                                     $isPassed = array_search($status, array_keys($timeline)) < array_search($currentStatus, array_keys($timeline));
-                                    
+
                                     if ($isActive) {
                                         $result[] = "🔄 **{$status}** - {$info['desc']} (Status Saat Ini)";
                                     } elseif ($isPassed) {
@@ -81,13 +81,13 @@ class ViewPermohonanTera extends ViewRecord
                                         $result[] = "⚪ {$status} - {$info['desc']}";
                                     }
                                 }
-                                
+
                                 return implode("\n", $result);
                             })
                             ->listWithLineBreaks(),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Informasi Permohonan')
                     ->description('Detail permohonan tera')
                     ->icon('heroicon-o-clipboard-document-list')
@@ -102,7 +102,7 @@ class ViewPermohonanTera extends ViewRecord
                                     ->copyable()
                                     ->copyMessage('Nomor permohonan disalin!')
                                     ->badge(),
-                                    
+
                                 TextEntry::make('status')
                                     ->label('Status')
                                     ->badge()
@@ -123,7 +123,7 @@ class ViewPermohonanTera extends ViewRecord
                                         default => 'heroicon-o-question-mark-circle'
                                     }),
                             ]),
-                            
+
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('jenis_layanan')
@@ -141,20 +141,20 @@ class ViewPermohonanTera extends ViewRecord
                                         'Sidang Tera' => 'heroicon-o-building-storefront',
                                         default => 'heroicon-o-cog-6-tooth'
                                     }),
-                                    
+
                                 TextEntry::make('petugas_assigned')
                                     ->label('Petugas Ditugaskan')
                                     ->placeholder('Belum ditugaskan')
                                     ->icon('heroicon-o-user'),
                             ]),
-                            
+
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('tanggal_permohonan')
                                     ->label('Tanggal Permohonan')
                                     ->date('d M Y')
                                     ->icon('heroicon-o-calendar'),
-                                    
+
                                 TextEntry::make('tanggal_jadwal')
                                     ->label('Tanggal Jadwal')
                                     ->date('d M Y')
@@ -163,7 +163,7 @@ class ViewPermohonanTera extends ViewRecord
                             ]),
                     ])
                     ->columns(1),
-                    
+
                 Section::make('Informasi UTTP')
                     ->description('Detail UTTP yang akan ditera')
                     ->icon('heroicon-o-scale')
@@ -175,24 +175,24 @@ class ViewPermohonanTera extends ViewRecord
                                     ->badge()
                                     ->color('primary')
                                     ->copyable(),
-                                    
-                                TextEntry::make('uttp.nama_pemilik')
+
+                                TextEntry::make('uttp.pemilik.nama')
                                     ->label('Nama Pemilik')
                                     ->weight(FontWeight::Bold)
                                     ->icon('heroicon-o-user'),
                             ]),
-                            
+
                         Grid::make(3)
                             ->schema([
                                 TextEntry::make('uttp.jenisUttp.nama')
                                     ->label('Jenis UTTP')
                                     ->badge()
                                     ->color('info'),
-                                    
+
                                 TextEntry::make('uttp.nomor_seri')
                                     ->label('Nomor Seri')
                                     ->copyable(),
-                                    
+
                                 TextEntry::make('uttp.status_tera')
                                     ->label('Status Tera UTTP')
                                     ->badge()
@@ -203,14 +203,14 @@ class ViewPermohonanTera extends ViewRecord
                                         default => 'secondary'
                                     }),
                             ]),
-                            
+
                         TextEntry::make('uttp.lokasi_lengkap')
                             ->label('Lokasi UTTP')
                             ->icon('heroicon-o-map-pin')
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Catatan & Dokumentasi')
                     ->description('Catatan dan dokumen pendukung')
                     ->icon('heroicon-o-document-text')
@@ -219,12 +219,12 @@ class ViewPermohonanTera extends ViewRecord
                             ->label('Catatan Pemohon')
                             ->placeholder('Tidak ada catatan')
                             ->columnSpanFull(),
-                            
+
                         TextEntry::make('catatan_petugas')
                             ->label('Catatan Petugas')
                             ->placeholder('Tidak ada catatan')
                             ->columnSpanFull(),
-                            
+
                         TextEntry::make('dokumen_pendukung')
                             ->label('Dokumen Pendukung')
                             ->formatStateUsing(function ($state) {
@@ -238,7 +238,7 @@ class ViewPermohonanTera extends ViewRecord
                             ->icon(fn ($state) => empty($state) ? 'heroicon-o-document' : 'heroicon-o-document-check'),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Riwayat Aktivitas')
                     ->description('Log aktivitas permohonan')
                     ->icon('heroicon-o-clipboard-document-list')
@@ -249,15 +249,15 @@ class ViewPermohonanTera extends ViewRecord
                                 $activities = [
                                     $record->created_at->format('d M Y H:i') . ' - Permohonan dibuat',
                                 ];
-                                
+
                                 if ($record->status !== 'Pending') {
                                     $activities[] = $record->updated_at->format('d M Y H:i') . ' - Status diubah ke ' . $record->status;
                                 }
-                                
+
                                 if ($record->petugas_assigned) {
                                     $activities[] = $record->updated_at->format('d M Y H:i') . ' - Ditugaskan ke ' . $record->petugas_assigned;
                                 }
-                                
+
                                 return implode("\n", $activities);
                             })
                             ->listWithLineBreaks(),

@@ -50,14 +50,14 @@ class HasilTera extends Model
         return $query->where('petugas_tera', $petugas);
     }
 
-    public function scopeLulus($query)
+    public function scopeSah($query)
     {
-        return $query->where('hasil', 'Lulus');
+        return $query->where('hasil', 'Sah');
     }
 
     public function scopeExpiredSoon($query, $days = 30)
     {
-        return $query->where('hasil', 'Lulus')
+        return $query->where('hasil', 'Sah')
                     ->whereNotNull('tanggal_expired')
                     ->whereDate('tanggal_expired', '<=', now()->addDays($days));
     }
@@ -66,8 +66,8 @@ class HasilTera extends Model
     public function getHasilBadgeAttribute()
     {
         return match($this->hasil) {
-            'Lulus' => 'success',
-            'Tidak Lulus' => 'danger',
+            'Sah' => 'success',
+            'Batal' => 'danger',
             'Rusak' => 'warning',
             'Tidak Layak' => 'secondary',
             default => 'secondary'
@@ -76,10 +76,10 @@ class HasilTera extends Model
 
     public function getIsExpiredSoonAttribute()
     {
-        if (!$this->tanggal_expired || $this->hasil !== 'Lulus') {
+        if (!$this->tanggal_expired || $this->hasil !== 'Sah') {
             return false;
         }
-        
+
         return $this->tanggal_expired->diffInDays(now()) <= 30;
     }
 
@@ -92,12 +92,12 @@ class HasilTera extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::created(function ($model) {
             // Update status UTTP berdasarkan hasil tera
             $newStatus = match($model->hasil) {
-                'Lulus' => 'Aktif',
-                'Tidak Lulus' => 'Tidak Lulus',
+                'Sah' => 'Aktif',
+                'Batal' => 'Batal',
                 'Rusak' => 'Rusak',
                 'Tidak Layak' => 'Tidak Layak',
                 default => $model->uttp->status_tera
@@ -109,8 +109,8 @@ class HasilTera extends Model
                 'petugas_tera' => $model->petugas_tera,
             ];
 
-            // Hanya update field sertifikat jika lulus
-            if ($model->hasil === 'Lulus') {
+            // Hanya update field sertifikat jika sah
+            if ($model->hasil === 'Sah') {
                 $updateData['tanggal_expired'] = $model->tanggal_expired;
                 $updateData['nomor_sertifikat'] = $model->nomor_sertifikat;
             }
@@ -122,8 +122,8 @@ class HasilTera extends Model
                 'status' => 'Selesai'
             ]);
 
-            // Generate sertifikat PDF jika lulus
-            if ($model->hasil === 'Lulus' && $model->nomor_sertifikat) {
+            // Generate sertifikat PDF jika sah
+            if ($model->hasil === 'Sah' && $model->nomor_sertifikat) {
                 static::generateCertificate($model);
             }
 
@@ -135,8 +135,8 @@ class HasilTera extends Model
             // Update UTTP jika ada perubahan hasil
             if ($model->wasChanged('hasil')) {
                 $newStatus = match($model->hasil) {
-                    'Lulus' => 'Aktif',
-                    'Tidak Lulus' => 'Tidak Lulus',
+                    'Sah' => 'Aktif',
+                    'Batal' => 'Batal',
                     'Rusak' => 'Rusak',
                     'Tidak Layak' => 'Tidak Layak',
                     default => $model->uttp->status_tera

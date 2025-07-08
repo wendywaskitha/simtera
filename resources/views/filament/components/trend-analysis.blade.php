@@ -1,21 +1,21 @@
 <div class="space-y-6">
     @if($previous)
         @php
-            $currentPersentase = $current->persentase_lulus;
-            $previousPersentase = $previous->persentase_lulus;
+            $currentPersentase = $current->persentase_sah;
+            $previousPersentase = $previous->persentase_sah;
             $trendPersentase = $currentPersentase - $previousPersentase;
             $trendIcon = $trendPersentase > 0 ? '📈' : ($trendPersentase < 0 ? '📉' : '➡️');
             $trendColor = $trendPersentase > 0 ? 'green' : ($trendPersentase < 0 ? 'red' : 'gray');
-            
-            $teraGrowth = $previous->total_tera_dilakukan > 0 ? 
+
+            $teraGrowth = $previous->total_tera_dilakukan > 0 ?
                 round((($current->total_tera_dilakukan - $previous->total_tera_dilakukan) / $previous->total_tera_dilakukan) * 100, 1) : 0;
         @endphp
-        
+
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 {{ $trendIcon }} Perbandingan dengan Bulan Sebelumnya
             </h4>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Tingkat Keberhasilan -->
                 <div class="text-center">
@@ -24,11 +24,11 @@
                         {{ $currentPersentase }}%
                     </div>
                     <div class="text-sm text-{{ $trendColor }}-600">
-                        {{ $trendPersentase > 0 ? '+' : '' }}{{ number_format($trendPersentase, 1) }}% 
+                        {{ $trendPersentase > 0 ? '+' : '' }}{{ number_format($trendPersentase, 1) }}%
                         dari bulan lalu
                     </div>
                 </div>
-                
+
                 <!-- Total Tera -->
                 <div class="text-center">
                     <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Tera Dilakukan</div>
@@ -36,30 +36,30 @@
                         {{ number_format($current->total_tera_dilakukan) }}
                     </div>
                     <div class="text-sm text-{{ $teraGrowth >= 0 ? 'green' : 'red' }}-600">
-                        {{ $teraGrowth > 0 ? '+' : '' }}{{ $teraGrowth }}% 
+                        {{ $teraGrowth > 0 ? '+' : '' }}{{ $teraGrowth }}%
                         dari bulan lalu
                     </div>
                 </div>
-                
-                <!-- Tera Lulus -->
+
+                <!-- Tera Sah -->
                 <div class="text-center">
-                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Tera Lulus</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">Tera Sah</div>
                     <div class="text-2xl font-bold text-green-600">
-                        {{ number_format($current->total_tera_lulus) }}
+                        {{ number_format($current->total_tera_sah) }}
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">
-                        vs {{ number_format($previous->total_tera_lulus) }} bulan lalu
+                        vs {{ number_format($previous->total_tera_sah) }} bulan lalu
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Performance Insights -->
         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
             <h4 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-4">
                 💡 Insights & Rekomendasi
             </h4>
-            
+
             <div class="space-y-3">
                 @if($trendPersentase > 5)
                     <div class="flex items-start space-x-2">
@@ -83,7 +83,7 @@
                         </p>
                     </div>
                 @endif
-                
+
                 @if($teraGrowth > 10)
                     <div class="flex items-start space-x-2">
                         <span class="text-green-500">📈</span>

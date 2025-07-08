@@ -36,66 +36,74 @@ class PermohonanTera extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($model) {
             if (empty($model->nomor_permohonan)) {
-                $model->nomor_permohonan = static::generateNomorPermohonan();
+                // Load relasi UTTP dengan jenisUTTP untuk mendapatkan kode
+                $model->loadMissing('uttp.jenisUttp');
+                $kodeJenis = $model->uttp?->jenisUttp?->kode ?? 'TRA';
+                $model->nomor_permohonan = static::generateNomorPermohonan($kodeJenis);
             }
         });
     }
 
-    // Method generate nomor yang thread-safe
-    private static function generateNomorPermohonan()
+    // Method generate nomor yang thread-safe dengan kode jenis UTTP
+    private static function generateNomorPermohonan($kodeJenis)
     {
         $maxAttempts = 10;
         $attempt = 0;
-        
+
         do {
             $attempt++;
-            $nomor = static::createNomorPermohonan();
-            
+            $nomor = static::createNomorPermohonan($kodeJenis);
+
             // Cek apakah nomor sudah ada
             $exists = static::where('nomor_permohonan', $nomor)->exists();
-            
+
             if (!$exists) {
                 return $nomor;
             }
-            
+
             // Jika sudah ada, tunggu sebentar dan coba lagi
             usleep(100000); // 100ms
-            
+
         } while ($attempt < $maxAttempts);
-        
+
         // Jika masih gagal, gunakan timestamp untuk uniqueness
-        return static::createNomorPermohonanWithTimestamp();
+        return static::createNomorPermohonanWithTimestamp($kodeJenis);
     }
 
-    private static function createNomorPermohonan()
+    private static function createNomorPermohonan($kodeJenis)
     {
         $year = date('Y');
         $month = date('m');
         $day = date('d');
-        
-        // Ambil nomor urut terakhir untuk hari ini
+
+        // Pastikan kode jenis dalam huruf kapital
+        $prefix = strtoupper($kodeJenis);
+
+        // Ambil nomor urut terakhir untuk hari ini dengan prefix yang sama
         $lastPermohonan = static::whereDate('created_at', today())
+                               ->where('nomor_permohonan', 'like', "$prefix%")
                                ->orderBy('id', 'desc')
                                ->first();
-        
+
         $nextNumber = 1;
         if ($lastPermohonan) {
-            // Extract nomor urut dari nomor permohonan terakhir
+            // Extract nomor urut dari nomor permohonan terakhir (4 digit terakhir)
             $lastNumber = (int)substr($lastPermohonan->nomor_permohonan, -4);
             $nextNumber = $lastNumber + 1;
         }
-        
-        return 'TRA' . $year . $month . $day . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        return $prefix . $year . $month . $day . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
-    private static function createNomorPermohonanWithTimestamp()
+    private static function createNomorPermohonanWithTimestamp($kodeJenis)
     {
         $timestamp = now()->format('YmdHis');
         $random = str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT);
-        
-        return 'TRA' . $timestamp . $random;
+        $prefix = strtoupper($kodeJenis);
+
+        return $prefix . $timestamp . $random;
     }
 }

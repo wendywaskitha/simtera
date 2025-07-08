@@ -32,16 +32,16 @@ class ViewHasilTera extends ViewRecord
                 ->label('Download Sertifikat')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
-                ->url(fn (HasilTera $record) => $record->hasil === 'Lulus' ? route('certificate.download', $record) : null)
+                ->url(fn (HasilTera $record) => $record->hasil === 'Sah' ? route('certificate.download', $record) : null)
                 ->openUrlInNewTab()
-                ->visible(fn (HasilTera $record) => $record->hasil === 'Lulus' && $record->nomor_sertifikat),
+                ->visible(fn (HasilTera $record) => $record->hasil === 'Sah' && $record->nomor_sertifikat),
             Actions\Action::make('preview_certificate')
                 ->label('Preview Sertifikat')
                 ->icon('heroicon-o-eye')
                 ->color('info')
-                ->url(fn (HasilTera $record) => $record->hasil === 'Lulus' ? route('certificate.preview', $record) : null)
+                ->url(fn (HasilTera $record) => $record->hasil === 'Sah' ? route('certificate.preview', $record) : null)
                 ->openUrlInNewTab()
-                ->visible(fn (HasilTera $record) => $record->hasil === 'Lulus' && $record->nomor_sertifikat),
+                ->visible(fn (HasilTera $record) => $record->hasil === 'Sah' && $record->nomor_sertifikat),
         ];
     }
 
@@ -61,20 +61,20 @@ class ViewHasilTera extends ViewRecord
                                     ->weight(FontWeight::Bold)
                                     ->badge()
                                     ->color(fn (string $state): string => match ($state) {
-                                        'Lulus' => 'success',
-                                        'Tidak Lulus' => 'danger',
+                                        'Sah' => 'success',
+                                        'Batal' => 'danger',
                                         'Rusak' => 'warning',
                                         'Tidak Layak' => 'secondary',
                                         default => 'gray'
                                     })
                                     ->icon(fn (string $state): string => match ($state) {
-                                        'Lulus' => 'heroicon-o-check-circle',
-                                        'Tidak Lulus' => 'heroicon-o-x-circle',
+                                        'Sah' => 'heroicon-o-check-circle',
+                                        'Batal' => 'heroicon-o-x-circle',
                                         'Rusak' => 'heroicon-o-exclamation-triangle',
                                         'Tidak Layak' => 'heroicon-o-no-symbol',
                                         default => 'heroicon-o-question-mark-circle'
                                     }),
-                                    
+
                                 TextEntry::make('nomor_sertifikat')
                                     ->label('Nomor Sertifikat')
                                     ->placeholder('Tidak ada sertifikat')
@@ -84,14 +84,14 @@ class ViewHasilTera extends ViewRecord
                                     ->color('primary')
                                     ->icon('heroicon-o-document-text'),
                             ]),
-                            
+
                         Grid::make(3)
                             ->schema([
                                 TextEntry::make('tanggal_tera')
                                     ->label('Tanggal Tera')
                                     ->date('d M Y')
                                     ->icon('heroicon-o-calendar'),
-                                    
+
                                 TextEntry::make('tanggal_expired')
                                     ->label('Tanggal Expired')
                                     ->date('d M Y')
@@ -104,14 +104,14 @@ class ViewHasilTera extends ViewRecord
                                         return 'success';
                                     })
                                     ->icon('heroicon-o-calendar-days'),
-                                    
+
                                 TextEntry::make('petugas_tera')
                                     ->label('Petugas Tera')
                                     ->icon('heroicon-o-user'),
                             ]),
                     ])
                     ->columns(1),
-                    
+
                 Section::make('Informasi Permohonan')
                     ->description('Detail permohonan tera terkait')
                     ->icon('heroicon-o-clipboard-document-list')
@@ -123,7 +123,7 @@ class ViewHasilTera extends ViewRecord
                                     ->copyable()
                                     ->badge()
                                     ->color('gray'),
-                                    
+
                                 TextEntry::make('permohonanTera.jenis_layanan')
                                     ->label('Jenis Layanan')
                                     ->badge()
@@ -134,14 +134,14 @@ class ViewHasilTera extends ViewRecord
                                         default => 'secondary'
                                     }),
                             ]),
-                            
+
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('permohonanTera.tanggal_permohonan')
                                     ->label('Tanggal Permohonan')
                                     ->date('d M Y')
                                     ->icon('heroicon-o-calendar'),
-                                    
+
                                 TextEntry::make('permohonanTera.tanggal_jadwal')
                                     ->label('Tanggal Jadwal')
                                     ->date('d M Y')
@@ -150,7 +150,7 @@ class ViewHasilTera extends ViewRecord
                             ]),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Informasi UTTP')
                     ->description('Detail UTTP yang ditera')
                     ->icon('heroicon-o-scale')
@@ -162,36 +162,36 @@ class ViewHasilTera extends ViewRecord
                                     ->badge()
                                     ->color('primary')
                                     ->copyable(),
-                                    
-                                TextEntry::make('uttp.nama_pemilik')
+
+                                TextEntry::make('uttp.pemilik.nama')
                                     ->label('Nama Pemilik')
                                     ->weight(FontWeight::Bold)
                                     ->icon('heroicon-o-user'),
                             ]),
-                            
+
                         Grid::make(3)
                             ->schema([
                                 TextEntry::make('uttp.jenisUttp.nama')
                                     ->label('Jenis UTTP')
                                     ->badge()
                                     ->color('info'),
-                                    
+
                                 TextEntry::make('uttp.nomor_seri')
                                     ->label('Nomor Seri')
                                     ->copyable(),
-                                    
+
                                 TextEntry::make('uttp.merk')
                                     ->label('Merk')
                                     ->placeholder('Tidak ada data'),
                             ]),
-                            
+
                         TextEntry::make('uttp.lokasi_lengkap')
                             ->label('Lokasi UTTP')
                             ->icon('heroicon-o-map-pin')
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Catatan & Dokumentasi')
                     ->description('Catatan hasil dan dokumentasi foto')
                     ->icon('heroicon-o-document-text')
@@ -200,7 +200,7 @@ class ViewHasilTera extends ViewRecord
                             ->label('Catatan Hasil Pemeriksaan')
                             ->placeholder('Tidak ada catatan')
                             ->columnSpanFull(),
-                            
+
                         ImageEntry::make('foto_hasil')
                             ->label('Foto Hasil Pemeriksaan')
                             ->circular()
@@ -210,7 +210,7 @@ class ViewHasilTera extends ViewRecord
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
-                    
+
                 Section::make('Status Update Timeline')
                     ->description('Timeline update status UTTP')
                     ->icon('heroicon-o-clock')
@@ -219,40 +219,40 @@ class ViewHasilTera extends ViewRecord
                             ->label('')
                             ->formatStateUsing(function ($record) {
                                 $timeline = [];
-                                
+
                                 // Permohonan dibuat
                                 $timeline[] = "📝 {$record->permohonanTera->tanggal_permohonan->format('d M Y H:i')} - Permohonan tera dibuat";
-                                
+
                                 // Permohonan dijadwalkan
                                 if ($record->permohonanTera->tanggal_jadwal) {
                                     $timeline[] = "📅 {$record->permohonanTera->tanggal_jadwal->format('d M Y')} - Dijadwalkan untuk tera";
                                 }
-                                
+
                                 // Hasil tera diinput
                                 $resultIcon = match($record->hasil) {
-                                    'Lulus' => '✅',
-                                    'Tidak Lulus' => '❌',
+                                    'Sah' => '✅',
+                                    'Batal' => '❌',
                                     'Rusak' => '⚠️',
                                     'Tidak Layak' => '🚫',
                                     default => '❓'
                                 };
                                 $timeline[] = "{$resultIcon} {$record->tanggal_tera->format('d M Y H:i')} - Hasil tera: {$record->hasil}";
-                                
+
                                 // Status UTTP diupdate
-                                if ($record->hasil === 'Lulus') {
+                                if ($record->hasil === 'Sah') {
                                     $timeline[] = "🏆 {$record->created_at->format('d M Y H:i')} - Status UTTP diupdate ke Aktif";
                                     if ($record->nomor_sertifikat) {
                                         $timeline[] = "📜 {$record->created_at->format('d M Y H:i')} - Sertifikat {$record->nomor_sertifikat} diterbitkan";
                                     }
                                 }
-                                
+
                                 return implode("\n", $timeline);
                             })
                             ->listWithLineBreaks(),
                     ])
                     ->collapsible()
                     ->collapsed(false),
-                    
+
                 Section::make('Informasi Sistem')
                     ->description('Data audit dan tracking')
                     ->icon('heroicon-o-information-circle')
@@ -263,12 +263,12 @@ class ViewHasilTera extends ViewRecord
                                     ->label('Dibuat Pada')
                                     ->dateTime('d M Y, H:i')
                                     ->icon('heroicon-o-calendar'),
-                                    
+
                                 TextEntry::make('updated_at')
                                     ->label('Terakhir Diperbarui')
                                     ->dateTime('d M Y, H:i')
                                     ->icon('heroicon-o-clock'),
-                                    
+
                                 TextEntry::make('editable_until')
                                     ->label('Dapat Diedit Hingga')
                                     ->formatStateUsing(function ($record) {

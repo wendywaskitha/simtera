@@ -3,16 +3,11 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use App\Models\Desa;
-use App\Models\Pasar;
-use App\Models\HasilTera;
-use App\Models\JenisUTTP;
-use App\Models\PermohonanTera;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UTTP extends Model
 {
@@ -22,10 +17,7 @@ class UTTP extends Model
 
     protected $fillable = [
         'kode_uttp',
-        'nama_pemilik',
-        'nik_pemilik',
-        'telepon_pemilik',
-        'alamat_pemilik',
+        'pemilik_id',
         'jenis_uttp_id',
         'merk',
         'tipe',
@@ -60,23 +52,25 @@ class UTTP extends Model
         'longitude' => 'decimal:8',
     ];
 
-    // Relationships
+    // Relasi ke Pemilik
+    public function pemilik(): BelongsTo
+    {
+        return $this->belongsTo(Pemilik::class, 'pemilik_id');
+    }
+
+    // Relasi ke Jenis UTTP
     public function jenisUttp(): BelongsTo
     {
         return $this->belongsTo(JenisUTTP::class, 'jenis_uttp_id');
     }
 
+    // Relasi ke Desa
     public function desa(): BelongsTo
     {
         return $this->belongsTo(Desa::class);
     }
 
-    // Tambahkan di Model UTTP
-    public function pasar(): BelongsTo
-    {
-        return $this->belongsTo(Pasar::class);
-    }
-
+    // Relasi lainnya (sesuai kebutuhan)
     public function permohonanTeras(): HasMany
     {
         return $this->hasMany(PermohonanTera::class);
@@ -90,10 +84,9 @@ class UTTP extends Model
     public function hasilTeraAktif(): HasOne
     {
         return $this->hasOne(HasilTera::class)
-                    ->where('hasil', 'Lulus')
+                    ->where('hasil', 'Sah')
                     ->latest('tanggal_tera');
     }
-
 
     // Scopes
     public function scopeAktif($query)
@@ -120,6 +113,11 @@ class UTTP extends Model
     public function scopeByDesa($query, $desaId)
     {
         return $query->where('desa_id', $desaId);
+    }
+
+    public function scopeByPemilik($query, $pemilikId)
+    {
+        return $query->where('pemilik_id', $pemilikId);
     }
 
     // Accessors

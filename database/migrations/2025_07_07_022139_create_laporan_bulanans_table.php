@@ -17,13 +17,13 @@ return new class extends Migration
             $table->tinyInteger('bulan');
             $table->integer('total_uttp_terdaftar')->default(0);
             $table->integer('total_tera_dilakukan')->default(0);
-            $table->integer('total_tera_lulus')->default(0);
-            $table->integer('total_tera_tidak_lulus')->default(0);
+            $table->integer('total_tera_sah')->default(0);
+            $table->integer('total_tera_batal')->default(0);
             $table->integer('total_permohonan')->default(0);
             $table->json('detail_per_jenis')->nullable(); // Breakdown per jenis UTTP
             $table->json('detail_per_lokasi')->nullable(); // Breakdown per kecamatan
             $table->timestamps();
-            
+
             $table->unique(['tahun', 'bulan']);
             $table->index(['tahun', 'bulan']);
         });
